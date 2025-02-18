@@ -3,3 +3,4 @@
 
 # dlls
 *.dll
+/src/obj
