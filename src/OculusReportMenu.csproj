@@ -54,5 +54,8 @@
 		<Reference Include="UnityEngine.XRModule">
 		  <HintPath>$(GameAssemblyPath)\UnityEngine.XRModule.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+		  <HintPath>..\..\..\..\..\..\Program Files\Oculus\Software\Software\another-axiom-gorilla-tag\Gorilla Tag_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 </Project>
