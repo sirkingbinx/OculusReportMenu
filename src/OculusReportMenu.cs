@@ -1,80 +1,62 @@
 using BepInEx;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
 using UnityEngine.XR.Management;
-
-namespace OculusReportMenu {
+namespace OculusReportMenu
+{
     [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.6")]
     public class Plugin : BaseUnityPlugin
     {
-        static bool ModEnabled = true;
-        public static bool Menu = false;
-        public static bool NoSecondary = false;
+        public static bool Menu, NoSecondary;
+        public static GorillaMetaReport MetaReportMenu;
 
         public void Update()
         {
-            if (!ModEnabled) return;
             if (Menu)
             {
                 // hide the fact that they're in report menu to prevent comp cheating
                 GorillaLocomotion.Player.Instance.disableMovement = false;
                 GorillaLocomotion.Player.Instance.inOverlay = false;
             }
-
-            if ((ControllerInputPoller.instance.leftControllerSecondaryButton || (NoSecondary && ControllerInputPoller.instance.leftControllerPrimaryButton)) || Keyboard.current.rightAltKey.wasPressedThisFrame)
+            else if (GetControllerPressed() || Keyboard.current.rightAltKey.wasPressedThisFrame)
             {
-                if (!Menu) // stop it from opening the menu a whole ton
-                {
-                    GorillaMetaReport gr = GameObject.Find("Miscellaneous Scripts").transform.Find("MetaReporting").GetComponent<GorillaMetaReport>();
-                    gr.gameObject.SetActive(true);
-                    Menu = true;
-                    gr.enabled = true;
-                    MethodInfo inf = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
-                    inf.Invoke(gr, null);
-                }
+                ShowMenu();
             }
         }
+        // saying this is the value of:  //bool      //true                                                    //false
+        bool GetControllerPressed() => NoSecondary ? ControllerInputPoller.instance.leftControllerPrimaryButton : ControllerInputPoller.instance.leftControllerSecondaryButton;
 
-        public static void ShowMenu() {
-        // This was placed here for my Vive report patch, see here
-        // https://github.com/oatsalmon/vive-orm-patch
+        public static void ShowMenu()
+        {
             if (!Menu)
             {
-                GorillaMetaReport gr = GameObject.Find("Miscellaneous Scripts").transform.Find("MetaReporting").GetComponent<GorillaMetaReport>();
-                gr.gameObject.SetActive(true);
-                Menu = true;
-                gr.enabled = true;
+                MetaReportMenu.gameObject.SetActive(true);
+                MetaReportMenu.enabled = true;
                 MethodInfo inf = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
-                inf.Invoke(gr, null);
+                inf.Invoke(MetaReportMenu, null);
+                Menu = true;
             }
         }
 
-        public void OnEnable() {
+        public void OnEnable()
+        {
             HarmonyPatches.ApplyHarmonyPatches();
 
             // check for HTC vive headset
-            var displaySubsystems = new List<XRDisplaySubsystem>();
-            SubsystemManager.GetInstances(displaySubsystems);
-        
-            XRDisplaySubsystem displaySubsystem = displaySubsystems[0];
-            Debug.Log("VR Headset detected by Unity: " + displaySubsystem.SubsystemDescriptor.id);
+            var displaySubsystems = XRGeneralSettings.Instance.Manager.activeLoader.GetLoadedSubsystem<XRDisplaySubsystem>();
+            Debug.Log("VR Headset detected by Unity: " + displaySubsystems.SubsystemDescriptor.id);
 
-            if (displaySubsystem.SubsystemDescriptor.id.Contains("HTC Vive")) {
-                NoSecondary = true;
-            } else {
-                NoSecondary = false;
-            }
-
-            // enable
-            ModEnabled = true;
+            NoSecondary = displaySubsystems.SubsystemDescriptor.id.Contains("HTC Vive");
         }
-        
-        public void OnDisable() {
+
+        public void OnDisable() 
+        {
             HarmonyPatches.RemoveHarmonyPatches();
-            ModEnabled = false;
         }
     }
 
@@ -84,6 +66,14 @@ namespace OculusReportMenu {
         static void Postfix()
         {
             Plugin.Menu = false;
+        }
+    }
+    [HarmonyPatch(typeof(GorillaMetaReport), "Start")] // Getting the Script when it starts
+    public class CheckMenuStart
+    {
+        static void Postfix(GorillaMetaReport __instance)//has to be called this
+        {
+            Plugin.MetaReportMenu = __instance;
         }
     }
 }
