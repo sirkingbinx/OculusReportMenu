@@ -1,10 +1,8 @@
 using BepInEx;
 using HarmonyLib;
-using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.XR.Management;
 
 namespace OculusReportMenu {
     [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.6")]
@@ -56,16 +54,17 @@ namespace OculusReportMenu {
             HarmonyPatches.ApplyHarmonyPatches();
 
             // check for HTC vive headset
-            var displaySubsystems = new List<XRDisplaySubsystem>();
-            SubsystemManager.GetInstances(displaySubsystems);
-        
-            XRDisplaySubsystem displaySubsystem = displaySubsystems[0];
-            Debug.Log("VR Headset detected by Unity: " + displaySubsystem.SubsystemDescriptor.id);
+            string[] devices = Input.GetJoystickNames();
 
-            if (displaySubsystem.SubsystemDescriptor.id.Contains("HTC Vive")) {
-                NoSecondary = true;
-            } else {
-                NoSecondary = false;
+            if (devices.Length > 0)
+            {
+                foreach (string devName in devices)
+                {
+                    if (devName.ToLower().Contains("vive"))
+                    {
+                        NoSecondary = true;
+                    }
+                }
             }
 
             // enable
