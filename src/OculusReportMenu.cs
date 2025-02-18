@@ -50,7 +50,7 @@ namespace OculusReportMenu {
             // check for HTC vive headset
             XRDisplaySubsystem displaySubsystems = XRGeneralSettings.Instance.Manager.activeLoader.GetLoadedSubsystem<XRDisplaySubsystem>();
             Debug.Log("VR Headset detected by Unity: " + displaySubsystems.SubsystemDescriptor.id);
-            NoSecondary = displaySubsystems.SubsystemDescriptor.id.Contains("HTC Vive");
+            NoSecondary = displaySubsystems.SubsystemDescriptor.id.Contains("Vive");
         }
 
         public void OnDisable() 
