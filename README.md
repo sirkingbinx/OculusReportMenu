@@ -27,5 +27,5 @@ For any headset that does not have a secondary left button, you can use the Alt 
 | Oculus Rift S | Left Controller "Y" |
 | HP Reverb G2 | Left Controller "Y" |
 | Valve Index | Left Controller "Y" |
-| HTC Vive PCVR | "Sandwitch" |
-| HTC Vive Standalone | "Sandwitch" |
+| HTC Vive PCVR | Left "Sandwich" button |
+| HTC Vive Standalone | Left "Sandwich" button |
