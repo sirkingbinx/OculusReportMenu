@@ -12,11 +12,13 @@ namespace OculusReportMenu {
     [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.6")]
     public class Plugin : BaseUnityPlugin
     {
-        public static bool Menu, NoSecondary;
+        public static bool Menu, NoSecondary, ValuesInitialized, CanOpen;
         public static GorillaMetaReport MetaReportMenu;
 
         public void Update()
         {
+            if (!ValuesInitialized || !CanOpen) return;
+            
             if (Menu)
             {
                 // hide the fact that they're in report menu to prevent comp cheating
@@ -43,19 +45,22 @@ namespace OculusReportMenu {
             }
         }
 
+        public void Start()
+        {
+            CanOpen = false;
+            ValuesInitialized = false;
+        }
+
         public void OnEnable()
         {
+            CanOpen = true;
             HarmonyPatches.ApplyHarmonyPatches();
-
-            // check for HTC vive headset
-            XRDisplaySubsystem displaySubsystems = XRGeneralSettings.Instance.Manager.activeLoader.GetLoadedSubsystem<XRDisplaySubsystem>();
-            Debug.Log("VR Headset detected by Unity: " + displaySubsystems.SubsystemDescriptor.id);
-            NoSecondary = displaySubsystems.SubsystemDescriptor.id.Contains("Vive");
         }
 
         public void OnDisable() 
         {
             HarmonyPatches.RemoveHarmonyPatches();
+            CanOpen = false;
         }
     }
 
@@ -73,6 +78,13 @@ namespace OculusReportMenu {
         static void Postfix(GorillaMetaReport __instance)//has to be called this
         {
             Plugin.MetaReportMenu = __instance;
+
+            // check for HTC vive headset
+            XRDisplaySubsystem displaySubsystems = XRGeneralSettings.Instance.Manager.activeLoader.GetLoadedSubsystem<XRDisplaySubsystem>();
+            Debug.Log("VR Headset detected by Unity: " + displaySubsystems.SubsystemDescriptor.id);
+            NoSecondary = displaySubsystems.SubsystemDescriptor.id.ToLower().Contains("htc");
+
+            ValuesInitialized = true;
         }
     }
 }
