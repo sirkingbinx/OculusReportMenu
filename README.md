@@ -29,3 +29,4 @@ For any headset that does not have a secondary left button, you can use the Alt 
 | Valve Index | Left Controller "Y" |
 | HTC Vive PCVR | Left "Sandwich" button |
 | HTC Vive Standalone | Left "Sandwich" button |
+| Pico | Left Controller "Y" |
