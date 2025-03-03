@@ -57,5 +57,8 @@
 		<Reference Include="UnityEngine.InputLegacyModule">
 		  <HintPath>$(GameAssemblyPath)\UnityEngine.InputLegacyModule.dll</HintPath>
 		</Reference>
+		<Reference Include="Valve.VR">
+		  <HintPath>$(GameAssemblyPath)\Valve.VR.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 </Project>
