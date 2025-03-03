@@ -10,7 +10,7 @@ using UnityEngine.XR.Management;
 using Valve.VR;
 
 namespace OculusReportMenu {
-    [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.7")]
+    [BepInPlugin("org.stickmaster1-.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static bool Menu;
@@ -53,6 +53,11 @@ namespace OculusReportMenu {
         {
             HarmonyPatches.ApplyHarmonyPatches();
 
+            // do not qmod
+            // rift users remain unaffected (your platform tag is "OCULUS PC")
+            if (PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("quest"))
+                Application.Quit();
+            
             usingSteamVR = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
         }
 
