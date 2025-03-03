@@ -7,16 +7,20 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
+using Valve.VR;
 
 namespace OculusReportMenu {
-    [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.6")]
+    [BepInPlugin("org.oatsalmon.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.7")]
     public class Plugin : BaseUnityPlugin
     {
         public static bool Menu;
         public static GorillaMetaReport MetaReportMenu;
+        public static bool usingSteamVR;
 
         public void Update()
         {
+            if (!usingSteamVR) riftStickClick = InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primary2DAxisClick, out riftStickClick);
+            
             if (Menu)
             {
                 // hide the fact that they're in report menu to prevent comp cheating
@@ -29,7 +33,9 @@ namespace OculusReportMenu {
             }
         }
 
-        bool GetControllerPressed() => ControllerInputPoller.instance.leftControllerSecondaryButton;
+        private static bool riftStickClick;
+        
+        bool GetControllerPressed() => (usingSteamVR ? SteamVR_Actions.gorillaTag_RightJoystickClick.state : riftStickClick) && ControllerInputPoller.instance.leftControllerSecondaryButton;
 
         public static void ShowMenu()
         {
@@ -46,6 +52,8 @@ namespace OculusReportMenu {
         public void OnEnable()
         {
             HarmonyPatches.ApplyHarmonyPatches();
+
+            usingSteamVR = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
         }
 
         public void OnDisable() 
