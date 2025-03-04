@@ -5,6 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
+using GorillaNetworking;
 using Valve.VR;
 
 namespace OculusReportMenu {
@@ -17,7 +18,7 @@ namespace OculusReportMenu {
 
         public void Update()
         {
-            if (!usingSteamVR) InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primary2DAxisClick, out riftStickClick);
+            if (!usingSteamVR) InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out riftStickClick);
             
             if (Menu)
             {
