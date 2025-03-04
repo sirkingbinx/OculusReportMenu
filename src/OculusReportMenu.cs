@@ -1,16 +1,14 @@
 using BepInEx;
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
-using UnityEngine.XR.Management;
 using Valve.VR;
 
 namespace OculusReportMenu {
-    [BepInPlugin("org.stickmaster1-.gorillatag.oculusreportmenu", "OculusReportMenu", "1.0.7")]
+    [BepInPlugin("org.stickmaster.gorillatag.oculusreportmenu", "OculusReportMenu", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static bool Menu;
@@ -19,7 +17,7 @@ namespace OculusReportMenu {
 
         public void Update()
         {
-            if (!usingSteamVR) riftStickClick = InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primary2DAxisClick, out riftStickClick);
+            if (!usingSteamVR) InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primary2DAxisClick, out riftStickClick);
             
             if (Menu)
             {

@@ -22,10 +22,8 @@ For any headset that does not have a secondary left button, you can use the Alt 
 
 | Headset | Keybind | Tested |
 |---------|---------|-----------|
-| Oculus Quest 1/2/3S/3/Pro | Left Controller "Y" | ✔️ |
-| Oculus Rift (Touch Controllers) | Left Controller "Y" | ✖️ |
-| Oculus Rift S | Left Controller "Y" | ✔️ |
-| HP Reverb G2 | Left Controller "Y" | ✖️ |
-| Valve Index | Left Controller "Y" | ✖️ |
-| HTC Vive PCVR | Left "Sandwich" button | ✖️ |
-| Pico | Left Controller "Y" | ✖️ |
+| Oculus | Left secondary (Y) / Right thumbstick in | ✔️ |
+| HP Reverb G2 | Left secondary (Y) / Right thumbstick in | ✖️ |
+| Valve Index | Left secondary (Y) / Right thumbstick in | ✖️ |
+| HTC Vive PCVR | Right alt key (KB) | ✖️ |
+| Pico | Left secondary (Y) / Right thumbstick in | ✖️ |
