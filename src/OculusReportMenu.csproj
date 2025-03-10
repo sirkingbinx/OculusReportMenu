@@ -48,6 +48,9 @@
 		<Reference Include="UnityEngine.SubsystemsModule">
 		  <HintPath>$(GameAssemblyPath)\UnityEngine.SubsystemsModule.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.UI">
+		  <HintPath>$(GameAssemblyPath)\UnityEngine.UI.dll</HintPath>
+		</Reference>
 		<Reference Include="UnityEngine.XR.LegacyInputHelpers">
 		  <HintPath>$(GameAssemblyPath)\UnityEngine.XR.LegacyInputHelpers.dll</HintPath>
 		</Reference>
