@@ -1,19 +1,19 @@
+// OculusReportMenu
+// (C) Copyright 2024 - 2025 Bingus Bingusington
+// MIT License
+
 using HarmonyLib;
 using System;
 using System.Reflection;
 
 namespace OculusReportMenu
 {
-    /// <summary>
-    /// This class handles applying harmony patches to the game.
-    /// You should not need to modify this class.
-    /// </summary>
     public class HarmonyPatches
     {
         private static Harmony instance;
 
         public static bool IsPatched { get; private set; }
-        public const string InstanceId = "org.oatsalmon.gorillatag.oculusreportmenu";
+        public const string InstanceId = "bingus_dev.oculusreportmenu";
 
         internal static void ApplyHarmonyPatches()
         {

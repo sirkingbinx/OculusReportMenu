@@ -1,3 +1,7 @@
+// OculusReportMenu
+// (C) Copyright 2024 - 2025 Bingus Bingusington
+// MIT License
+
 using BepInEx;
 using HarmonyLib;
 using System.Reflection;
@@ -16,7 +20,7 @@ namespace OculusReportMenu {
         public const string Version = "1.1.1";
     }
 
-    [BepInPlugin("stickmaster.oculusreportmenu.base", "OculusReportMenu", VersionInfo.Version)]
+    [BepInPlugin("bingus_dev.oculusreportmenu", "OculusReportMenu", VersionInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
