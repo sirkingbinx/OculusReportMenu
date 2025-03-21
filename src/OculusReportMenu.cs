@@ -38,8 +38,8 @@ namespace OculusReportMenu {
             if (Menu)
             {
                 // hide the fact that they're in report menu to prevent comp cheating
-                Player.Instance.disableMovement = false;
-                Player.Instance.inOverlay = false;
+                GTPlayer.Instance.disableMovement = false;
+                GTPlayer.Instance.inOverlay = false;
 
                 if (usingSteamVR)
                 {
@@ -53,8 +53,8 @@ namespace OculusReportMenu {
                     // (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("[SIDE]HandObject").GetValue()
 
                     occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
-                    metaRightHand.transform.SetPositionAndRotation(Player.Instance.rightControllerTransform.position, Player.Instance.rightControllerTransform.rotation);
-                    metaLeftHand.transform.SetPositionAndRotation(Player.Instance.leftControllerTransform.position, Player.Instance.leftControllerTransform.rotation);
+                    metaRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position, GTPlayer.Instance.rightControllerTransform.rotation);
+                    metaLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position, GTPlayer.Instance.leftControllerTransform.rotation);
 
                     MethodInfo CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
                     CheckDistance.Invoke(MetaReportMenu, null);
