@@ -22,6 +22,19 @@ Here is a guide to the keybinds:
 | Grip                   |LG                         |RG                          |
 | Trigger               |LT                         |RT                          |
 | Thumbstick In |LJ                            |RJ                          |
+| None | none | none
+
+Here is the default configuration:
+```
+openButton1 = RJ # right thumbstick in
+openButton2 = LS # left secondary in
+```
+
+If you want to bind this to one button:
+```
+openButton1 = LP
+openButton2 = none
+```
 
 ## Why?
 Every major mod menu that Gorilla Tag modders use include an "anti-report" that will remove them from the lobby the moment it detects a user pressing the report button over their name. The Oculus report menu bypasses this by placing a leaderboard in front of you so you can report them without their anti-report kicking in.
