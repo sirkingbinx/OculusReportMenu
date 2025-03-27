@@ -17,7 +17,7 @@ using System.Collections;
 namespace OculusReportMenu {
     public class VersionInfo
     {
-        public const string Version = "1.1.1";
+        public const string Version = "1.1.3";
     }
 
     [BepInPlugin("bingus_dev.oculusreportmenu", "OculusReportMenu", VersionInfo.Version)]
@@ -193,7 +193,7 @@ namespace OculusReportMenu {
         {
             if (Plugin.usingSteamVR)
             {
-                Player.Instance.InReportMenu = false;
+                GTPlayer.Instance.InReportMenu = false;
             }
         }
     }
