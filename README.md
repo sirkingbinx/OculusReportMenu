@@ -7,7 +7,7 @@ This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift
 You can install this mod with [MonkeModManager](https://github.com/the-graze/monkemodmanager), look for "OculusReportMenu" under "Tweaks / Tools" <br>
 ![image](https://github.com/user-attachments/assets/21879ee0-dd12-446f-9a3b-8782fae407fb)
 
-> Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [MechanicMonke](https://github.com/bingus-dev/MechanicMonke)
+> Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager) or [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager)
 
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
