@@ -22,7 +22,7 @@ Here is a guide to the keybinds:
 | Grip                   |LG                         |RG                          |
 | Trigger               |LT                         |RT                          |
 | Thumbstick In |LJ                            |RJ                          |
-| None | none | none
+| None | NAN | NAN |
 
 Here is the default configuration:
 ```
