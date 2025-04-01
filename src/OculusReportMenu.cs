@@ -126,7 +126,7 @@ namespace OculusReportMenu {
         {
             bool temporarySClick = false;
 
-            switch (thisEntry.Value)
+            switch (thisEntry.Value.ToLower())
             {
                 // left hand
                 case "LP": return ControllerInputPoller.instance.leftControllerPrimaryButton;
