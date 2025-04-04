@@ -1,4 +1,5 @@
-# Oculus Report Menu for PCVR ![all](https://img.shields.io/github/downloads/bingus-dev/OculusReportMenu/total) ![latest release)](https://img.shields.io/github/downloads/bingus-dev/OculusReportMenu/latest/total?style=flat&label=downloads%20(latest%20release)) ![latest beta)](https://img.shields.io/github/downloads-pre/bingus-dev/OculusReportMenu/latest/total?style=flat&label=downloads%20(latest%20rc))
+# Oculus Report Menu for PCVR ![all](https://img.shields.io/github/downloads/bingus-dev/OculusReportMenu/total)
+> Join my discord https://discord.gg/binx
 
 This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift / Quest Link. Activate by pressing your right thumbstick in and clicking your left secondary button.
 
