@@ -13,7 +13,7 @@ namespace OculusReportMenu
         private static Harmony instance;
 
         public static bool IsPatched { get; private set; }
-        public const string InstanceId = "bingus_dev.oculusreportmenu";
+        public const string InstanceId = "binx.oculusreportmenu";
 
         internal static void ApplyHarmonyPatches()
         {

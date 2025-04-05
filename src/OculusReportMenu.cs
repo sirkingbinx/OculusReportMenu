@@ -1,5 +1,5 @@
 // OculusReportMenu
-// (C) Copyright 2024 - 2025 Bingus Bingusington
+// (C) Copyright 2024 - 2025 binx
 // MIT License
 
 using BepInEx;
@@ -17,10 +17,10 @@ using System.Collections;
 namespace OculusReportMenu {
     public class VersionInfo
     {
-        public const string Version = "1.1.3";
+        public const string Version = "1.2.0";
     }
 
-    [BepInPlugin("bingus_dev.oculusreportmenu", "OculusReportMenu", VersionInfo.Version)]
+    [BepInPlugin("binx.oculusreportmenu", "OculusReportMenu", VersionInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
@@ -41,27 +41,22 @@ namespace OculusReportMenu {
                 GTPlayer.Instance.disableMovement = false;
                 GTPlayer.Instance.inOverlay = false;
 
-                if (usingSteamVR)
-                {
-                    // all this is only required for SteamVR!!!!! dont mess with it if you're reporting bugs for the Oculus platform
+                // get stuff
+                GameObject occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");// (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("occluder").GetValue()
+                GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
+                GameObject metaRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
 
-                    // get stuff
-                    GameObject occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");// (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("occluder").GetValue()
-                    GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
-                    GameObject metaRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+                // (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("[SIDE]HandObject").GetValue()
 
-                    // (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("[SIDE]HandObject").GetValue()
+                occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
+                metaRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position, GTPlayer.Instance.rightControllerTransform.rotation);
+                metaLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position, GTPlayer.Instance.leftControllerTransform.rotation);
 
-                    occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
-                    metaRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position, GTPlayer.Instance.rightControllerTransform.rotation);
-                    metaLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position, GTPlayer.Instance.leftControllerTransform.rotation);
+                MethodInfo CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
+                CheckDistance.Invoke(MetaReportMenu, null);
 
-                    MethodInfo CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-                    CheckDistance.Invoke(MetaReportMenu, null);
-
-                    MethodInfo CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-                    CheckReportSubmit.Invoke(MetaReportMenu, null);
-                }
+                MethodInfo CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+                CheckReportSubmit.Invoke(MetaReportMenu, null);
             }
             else if (GetControllerPressed())
             {
@@ -126,7 +121,7 @@ namespace OculusReportMenu {
         {
             bool temporarySClick = false;
 
-            switch (thisEntry.Value)
+            switch (thisEntry.Value.ToUpper())
             {
                 // left hand
                 case "LP": return ControllerInputPoller.instance.leftControllerPrimaryButton;
@@ -180,21 +175,18 @@ namespace OculusReportMenu {
     [HarmonyPatch(typeof(GorillaMetaReport), "Start")] // Getting the Script when it starts
     public class CheckMenuStart
     {
-        static void Postfix(GorillaMetaReport __instance)//has to be called this
+        static void Postfix(GorillaMetaReport __instance) //has to be called this
         {
             Plugin.MetaReportMenu = __instance;
         }
     }
 
-    [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // yuihjkfgbuijnrfbduihjkndfbj
-    public class SteamUpdatePatch
+    [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
+    public class ForceDontSetHandsManually
     {
         static void Postfix()
         {
-            if (Plugin.usingSteamVR)
-            {
-                GTPlayer.Instance.InReportMenu = false;
-            }
+            GTPlayer.Instance.InReportMenu = false;
         }
     }
 
