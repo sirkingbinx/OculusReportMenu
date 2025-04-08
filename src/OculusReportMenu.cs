@@ -15,23 +15,19 @@ using Valve.VR;
 using System.Collections;
 
 namespace OculusReportMenu {
-    public class VersionInfo
-    {
-        public const string Version = "1.2.0";
-    }
-
-    [BepInPlugin("binx.oculusreportmenu", "OculusReportMenu", VersionInfo.Version)]
+    [BepInPlugin("binx.oculusreportmenu", "OculusReportMenu", "1.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
-        public static ConfigEntry<string> OpenButton1 { get; internal set; }
-        public static ConfigEntry<string> OpenButton2 { get; internal set; }
+        public static ConfigEntry<string> OpenButton1, OpenButton2 {get; internal set;}
 
         // base things
         public static bool Menu { get; internal set; }
         public static GorillaMetaReport MetaReportMenu { get; internal set; }
 
         internal static bool usingSteamVR;
+
+        MethodInfo CheckDistance, CheckReportSubmit, ShowMenu;
 
         void Update()
         {
@@ -46,22 +42,14 @@ namespace OculusReportMenu {
                 GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
                 GameObject metaRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
 
-                // (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("[SIDE]HandObject").GetValue()
-
                 occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
                 metaRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position, GTPlayer.Instance.rightControllerTransform.rotation);
                 metaLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position, GTPlayer.Instance.leftControllerTransform.rotation);
 
-                MethodInfo CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckDistance.Invoke(MetaReportMenu, null);
-
-                MethodInfo CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckReportSubmit.Invoke(MetaReportMenu, null);
             }
-            else if (GetControllerPressed())
-            {
-                ShowMenu();
-            }
+            else if (GetControllerPressed()) { ShowMenu(); }
         }
         internal bool GetControllerPressed() => CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) || Keyboard.current.tabKey.wasPressedThisFrame;
 
@@ -71,8 +59,8 @@ namespace OculusReportMenu {
             {
                 MetaReportMenu.gameObject.SetActive(true);
                 MetaReportMenu.enabled = true;
-                MethodInfo showMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
-                showMenu.Invoke(MetaReportMenu, null);
+                
+                ShowMenu.Invoke(MetaReportMenu, null);
                 Menu = true;
             }
         }
@@ -178,6 +166,10 @@ namespace OculusReportMenu {
         static void Postfix(GorillaMetaReport __instance) //has to be called this
         {
             Plugin.MetaReportMenu = __instance;
+
+            CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
+            CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+            ShowMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
         }
     }
 
