@@ -8,7 +8,7 @@ This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift
 You can install this mod with [MonkeModManager](https://github.com/the-graze/monkemodmanager), look for "OculusReportMenu" under "Tweaks / Tools" <br>
 ![image](https://github.com/user-attachments/assets/21879ee0-dd12-446f-9a3b-8782fae407fb)
 
-> Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager) or [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager)
+> Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [my mod manager (wip)](https://github.com/sirkingbinx/binxmodmanager)
 
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
@@ -34,7 +34,7 @@ openButton2 = LS # left secondary in
 If you want to bind this to one button:
 ```
 openButton1 = LP
-openButton2 = none
+openButton2 = NAN
 ```
 
 ## Why?
@@ -43,4 +43,4 @@ Every major mod menu that Gorilla Tag modders use include an "anti-report" that 
 This has never been avaliable to PCVR users, and it is super easy to implement in a small mod. This mod provides the same functionality and is completely legal and cannot get you banned.
 
 ## Usage
-Press your secondary button on the left controller to open the menu. Close it with the "X" button at the top of the screen.
+Press keybinds you set (by default, it is right stick click + left secondary) to open it. Press big X button to close.
