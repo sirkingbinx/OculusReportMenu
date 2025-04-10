@@ -15,14 +15,14 @@ using Valve.VR;
 using System.Collections;
 
 namespace OculusReportMenu {
-    [BepInPlugin("binx.oculusreportmenu", "OculusReportMenu", "1.2.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "1.2.1")]
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
         public static ConfigEntry<string> OpenButton1, OpenButton2 {get; internal set;}
 
         // base things
-        public static bool Menu { get; internal set; }
+        public static bool Menu, ModEnabled { get; internal set; }
         public static GorillaMetaReport MetaReportMenu { get; internal set; }
 
         internal static bool usingSteamVR;
@@ -49,7 +49,7 @@ namespace OculusReportMenu {
                 CheckDistance.Invoke(MetaReportMenu, null);
                 CheckReportSubmit.Invoke(MetaReportMenu, null);
             }
-            else if (GetControllerPressed()) { ShowMenu(); }
+            else if (GetControllerPressed() && ModEnabled) { ShowMenu(); }
         }
         internal bool GetControllerPressed() => CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) || Keyboard.current.tabKey.wasPressedThisFrame;
 
@@ -65,33 +65,11 @@ namespace OculusReportMenu {
             }
         }
 
-        public void OnEnable()
-        {
-            HarmonyPatches.ApplyHarmonyPatches();
-        }
-
-        public void OnDisable() 
-        {
-            HarmonyPatches.RemoveHarmonyPatches();
-        }
+        public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(); }
+        public void OnDisable() { ModEnabled = false; HarmonyPatches.RemoveHarmonyPatches(); }
 
         void Awake()
         {
-            /* key to configs
-             * P - primary
-             * S - secondary
-             * J - thumbstick
-             * T - trigger
-             * G - grip
-             * 
-             * L - left
-             * R - right
-             * 
-             * N - none (no keybind, make sure to set a key to the other one though)
-             * 
-             * examples: right trigger = RT, left secondary = LS
-             */
-
             OpenButton1 = Config.Bind("Keybinds",
                                       "OpenButton1",
                                       "LS",
@@ -118,12 +96,9 @@ namespace OculusReportMenu {
                 case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > 0.5f;
                 case "LJ":
                     if (usingSteamVR)
-                    {
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
-                    } else
-                    {
+                    else
                         InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
-                    }
 
                     return temporarySClick;
 
@@ -134,63 +109,17 @@ namespace OculusReportMenu {
                 case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > 0.5f;
                 case "RJ":
                     if (usingSteamVR)
-                    {
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
-                    }
                     else
-                    {
                         InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
-                    }
 
                     return temporarySClick;
 
                 case "NAN":
                     return true;
             }
+
             return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")] // GorillaMetaReport.Teardown() is called when X is pressed
-    public class CheckMenuClosed
-    {
-        static void Postfix()
-        {
-            Plugin.Menu = false;
-        }
-    }
-
-    [HarmonyPatch(typeof(GorillaMetaReport), "Start")] // Getting the Script when it starts
-    public class CheckMenuStart
-    {
-        static void Postfix(GorillaMetaReport __instance) //has to be called this
-        {
-            Plugin.MetaReportMenu = __instance;
-
-            CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-            CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-            ShowMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
-        }
-    }
-
-    [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
-    public class ForceDontSetHandsManually
-    {
-        static void Postfix()
-        {
-            GTPlayer.Instance.InReportMenu = false;
-        }
-    }
-
-    [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
-    public class GetPlayfabGameVersionPatch
-    {
-        static void Postfix()
-        {
-            if (PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam"))
-            {
-                Plugin.usingSteamVR = true;
-            }
         }
     }
 }
