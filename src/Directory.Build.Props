@@ -12,4 +12,7 @@
 		<PluginsPath>.\Libs</PluginsPath>
 		<WarningLevel>0</WarningLevel>
 	</PropertyGroup>
+	<PropertyGroup>
+		<ORMBuildTarget>Linux</ORMBuildTarget>
+	</PropertyGroup>
 </Project>

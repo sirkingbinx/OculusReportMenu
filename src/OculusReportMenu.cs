@@ -14,6 +14,16 @@ using BepInEx.Configuration;
 using Valve.VR;
 using System.Collections;
 
+// build target
+// uncomment one to build for it
+
+// #define BUILD_TARGET_WIN
+// #define BUILD_TARGET_LINUX
+
+#if (!BUILD_TARGET_WIN && !BUILD_TARGET_LINUX)
+    #error No build target defined. Please uncomment BUILD_TARGET_(x).
+#endif
+
 namespace OculusReportMenu {
     public class ModInfo {
         public static string UUID = "kingbingus.oculusreportmenu";
@@ -24,8 +34,11 @@ namespace OculusReportMenu {
     [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
+
+#if (BUILD_TARGET_WIN)
         // custom stuff
         public static ConfigEntry<string> OpenButton1, OpenButton2 {get; internal set;}
+#endif
 
         // base things
         public static bool Menu, ModEnabled { get; internal set; }
@@ -57,7 +70,14 @@ namespace OculusReportMenu {
             }
             else if (GetControllerPressed() && ModEnabled) { ShowMenu(); }
         }
+
+#if (BUILD_TARGET_WIN)
         internal bool GetControllerPressed() => CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) || Keyboard.current.tabKey.wasPressedThisFrame;
+#elif (BUILD_TARGET_LINUX)
+        internal bool GetControllerPressed() => ControllerInputPoller.instance.leftControllerSecondaryButton || Keyboard.current.tabKey.wasPressedThisFrame;
+#else
+        internal bool GetControllerPressed() => false;
+#endif
 
         internal static void ShowMenu()
         {
@@ -76,6 +96,7 @@ namespace OculusReportMenu {
 
         void Awake()
         {
+#if (BUILD_TARGET_WIN)
             OpenButton1 = Config.Bind("Keybinds",
                                       "OpenButton1",
                                       "LS",
@@ -86,9 +107,10 @@ namespace OculusReportMenu {
                                       "RJ",
                                       "One of the buttons you use to open ORM (NAN for none)");
         }
-
+#endif
         // checks for the right key
 
+#if (BUILD_TARGET_WIN)
         internal static bool CheckButtonPressedStatus(ConfigEntry<string> thisEntry)
         {
             bool temporarySClick = false;
@@ -127,5 +149,6 @@ namespace OculusReportMenu {
 
             return false;
         }
+#endif
     }
 }
