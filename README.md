@@ -11,6 +11,17 @@ You can install this mod with [MonkeModManager](https://github.com/the-graze/mon
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
 
+### From Source
+> [!NOTE]
+> Must have VS2022.
+
+Make sure to uncomment a build target before building. Uncomment based on what you're going to run ORM on, so for Linux users, uncomment BUILD_TARGET_LINUX.
+```cs
+#define BUILD_TARGET_WIN
+// #define BUILD_TARGET_LINUX
+```
+Build with CTRL + B.
+
 ## Config
 You can change the buttons you use with OculusReportMenu if your controller doesn't have the buttons used by default. Check your config and change it yourself.
 Here is a guide to the keybinds:
