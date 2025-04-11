@@ -106,8 +106,9 @@ namespace OculusReportMenu {
                                       "OpenButton2",
                                       "RJ",
                                       "One of the buttons you use to open ORM (NAN for none)");
-        }
 #endif
+        }
+
         // checks for the right key
 
 #if (BUILD_TARGET_WIN)
