@@ -9,7 +9,10 @@ You can install this mod with [MonkeModManager](https://github.com/the-graze/mon
 > Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [my mod manager (wip)](https://github.com/sirkingbinx/binxmodmanager)
 
 ### From Releases
-Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
+Look for the latest release, and download ``OculusReportMenu.Windows.dll``. Drag this into your plugins folder.
+
+> [!NOTE]
+> If you are running Linux, use ``OculusReportMenu.Linux.dll`` instead.
 
 ### From Source
 > [!NOTE]
