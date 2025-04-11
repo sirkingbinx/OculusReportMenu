@@ -15,7 +15,13 @@ using Valve.VR;
 using System.Collections;
 
 namespace OculusReportMenu {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "1.2.1")]
+    public class ModInfo {
+        public static string UUID = "kingbingus.oculusreportmenu";
+        public static string Name = "OculusReportMenu";
+        public static string Version = "1.2.1";
+    }
+
+    [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
@@ -65,7 +71,7 @@ namespace OculusReportMenu {
             }
         }
 
-        public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(); }
+        public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(ModInfo.UUID); }
         public void OnDisable() { ModEnabled = false; HarmonyPatches.RemoveHarmonyPatches(); }
 
         void Awake()

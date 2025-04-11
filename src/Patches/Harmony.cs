@@ -13,29 +13,30 @@ namespace OculusReportMenu
         private static Harmony instance;
 
         public static bool IsPatched { get; private set; }
-        public const string InstanceId = "binx.oculusreportmenu";
+        public const string InstanceId = "";
 
-        internal static void ApplyHarmonyPatches()
+        internal static void ApplyHarmonyPatches(string thisInstanceId = "com.author.gorillatag.mod")
         {
             if (!IsPatched)
             {
+                if (InstanceId == "") InstanceId = thisInstanceId;
+
                 if (instance == null)
-                {
                     instance = new Harmony(InstanceId);
-                }
 
                 instance.PatchAll(Assembly.GetExecutingAssembly());
                 IsPatched = true;
+            } else {
+                return;
             }
         }
 
         internal static void RemoveHarmonyPatches()
         {
             if (instance != null && IsPatched)
-            {
                 instance.UnpatchSelf();
-                IsPatched = false;
-            }
+            
+            IsPatched = false;
         }
     }
 }
