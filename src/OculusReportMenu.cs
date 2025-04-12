@@ -44,10 +44,19 @@ namespace OculusReportMenu {
 
         internal static bool usingSteamVR;
 
-        internal static MethodInfo CheckDistance, CheckReportSubmit, ShowMetaMenu;
+        internal static MethodInfo CheckDistance, CheckReportSubmit/*, ShowMetaMenu*/;
+
+        bool IsNull(object thing) => thing != null ? false : true;
 
         void Update()
         {
+            if (IsNull(CheckDistance) || IsNull(CheckDistance) /*|| IsNull(ShowMetaMenu)*/)
+            {
+                CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
+                CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+                // ShowMetaMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
             if (Menu)
             {
                 // hide the fact that they're in report menu to prevent comp cheating
@@ -83,8 +92,8 @@ namespace OculusReportMenu {
             {
                 MetaReportMenu.gameObject.SetActive(true);
                 MetaReportMenu.enabled = true;
-                
-                ShowMetaMenu.Invoke(MetaReportMenu, null);
+
+                typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(MetaReportMenu, null);
                 Menu = true;
             }
         }
@@ -149,5 +158,48 @@ namespace OculusReportMenu {
             return false;
         }
 #endif
+    }
+
+    [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")] // GorillaMetaReport.Teardown() is called when X is pressed
+    public class CheckMenuClosed
+    {
+        static void Postfix()
+        {
+            Plugin.Menu = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(GorillaMetaReport), "Start")] // Getting the Script when it starts
+    public class CheckMenuStart
+    {
+        static void Postfix(GorillaMetaReport __instance) //has to be called this
+        {
+            Plugin.MetaReportMenu = __instance;
+
+            Plugin.CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
+            Plugin.CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+            // Plugin.ShowMetaMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
+    public class ForceDontSetHandsManually
+    {
+        static void Postfix()
+        {
+            GTPlayer.Instance.InReportMenu = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
+    public class GetPlayfabGameVersionPatch
+    {
+        static void Postfix()
+        {
+            if (PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam"))
+            {
+                Plugin.usingSteamVR = true;
+            }
+        }
     }
 }
