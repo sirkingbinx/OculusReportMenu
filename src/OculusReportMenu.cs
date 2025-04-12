@@ -2,6 +2,9 @@
 // (C) Copyright 2024 - 2025 binx
 // MIT License
 
+// #define BUILD_TARGET_WIN
+// #define BUILD_TARGET_LINUX
+
 using BepInEx;
 using HarmonyLib;
 using System.Reflection;
@@ -13,12 +16,7 @@ using GorillaLocomotion;
 using BepInEx.Configuration;
 using Valve.VR;
 using System.Collections;
-
-// build target
-// uncomment one to build for it
-
-// #define BUILD_TARGET_WIN
-// #define BUILD_TARGET_LINUX
+using OculusReportMenu.Patches;
 
 #if (!BUILD_TARGET_WIN && !BUILD_TARGET_LINUX)
     #error No build target defined. Please uncomment BUILD_TARGET_(x).
@@ -26,9 +24,9 @@ using System.Collections;
 
 namespace OculusReportMenu {
     public class ModInfo {
-        public static string UUID = "kingbingus.oculusreportmenu";
-        public static string Name = "OculusReportMenu";
-        public static string Version = "1.2.1";
+        public const string UUID = "kingbingus.oculusreportmenu";
+        public const string Name = "OculusReportMenu";
+        public const string Version = "1.2.1";
     }
 
     [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
@@ -37,16 +35,16 @@ namespace OculusReportMenu {
 
 #if (BUILD_TARGET_WIN)
         // custom stuff
-        public static ConfigEntry<string> OpenButton1, OpenButton2 {get; internal set;}
+        internal static ConfigEntry<string> OpenButton1, OpenButton2;
 #endif
 
         // base things
-        public static bool Menu, ModEnabled { get; internal set; }
-        public static GorillaMetaReport MetaReportMenu { get; internal set; }
+        internal static bool Menu, ModEnabled;
+        internal static GorillaMetaReport MetaReportMenu;
 
         internal static bool usingSteamVR;
 
-        MethodInfo CheckDistance, CheckReportSubmit, ShowMenu;
+        internal static MethodInfo CheckDistance, CheckReportSubmit, ShowMetaMenu;
 
         void Update()
         {
@@ -86,7 +84,7 @@ namespace OculusReportMenu {
                 MetaReportMenu.gameObject.SetActive(true);
                 MetaReportMenu.enabled = true;
                 
-                ShowMenu.Invoke(MetaReportMenu, null);
+                ShowMetaMenu.Invoke(MetaReportMenu, null);
                 Menu = true;
             }
         }

@@ -6,16 +6,16 @@ using HarmonyLib;
 using System;
 using System.Reflection;
 
-namespace OculusReportMenu
+namespace OculusReportMenu.Patches
 {
     public class HarmonyPatches
     {
         private static Harmony instance;
 
         public static bool IsPatched { get; private set; }
-        public const string InstanceId = "";
+        public static string InstanceId = "";
 
-        internal static void ApplyHarmonyPatches(string thisInstanceId = "com.author.gorillatag.mod")
+        internal static void ApplyHarmonyPatches(string thisInstanceId)
         {
             if (!IsPatched)
             {
