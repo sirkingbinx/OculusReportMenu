@@ -1,0 +1,26 @@
+[
+	{
+		"name": "OculusReportMenu [1.2.1-rc3 Universal]",
+		"author": "KingBinx / Bingus",
+    "group": "OculusReportMenu",
+    "link": "https://github.com/sirkingbinx/OculusReportMenu/archive/refs/tags/v1.2.1-rc3.zip"
+	},
+  {
+		"name": "OculusReportMenu [1.2.1-rc3 Mini]",
+		"author": "KingBinx / Bingus",
+    "group": "OculusReportMenu",
+    "link": "https://github.com/sirkingbinx/OculusReportMenu/archive/refs/tags/v1.2.1-rc3.zip"
+	},
+  {
+		"name": "OculusReportMenu [1.2.1-rc3 Oculus Rift]",
+		"author": "KingBinx / Bingus",
+    "group": "OculusReportMenu",
+    "link": "https://github.com/sirkingbinx/OculusReportMenu/archive/refs/tags/v1.2.1-rc3.zip"
+	},
+  {
+		"name": "OculusReportMenu [1.2.1-rc3 Very Mini]",
+		"author": "KingBinx / Bingus",
+    "group": "OculusReportMenu",
+    "link": "https://github.com/sirkingbinx/OculusReportMenu/archive/refs/tags/v1.2.1-rc3.zip"
+	}
+]
