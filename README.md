@@ -9,20 +9,12 @@ You can install this mod with [MonkeModManager](https://github.com/the-graze/mon
 > Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [my mod manager (wip)](https://github.com/sirkingbinx/binxmodmanager)
 
 ### From Releases
-Look for the latest release, and download ``OculusReportMenu.Windows.dll``. Drag this into your plugins folder.
-
-> [!NOTE]
-> If you are running Linux, use ``OculusReportMenu.Linux.dll`` instead.
+Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
 
 ### From Source
 > [!NOTE]
 > Must have VS2022.
 
-Make sure to uncomment a build target before building. Uncomment based on what you're going to run ORM on, so for Linux users, uncomment BUILD_TARGET_LINUX.
-```cs
-#define BUILD_TARGET_WIN
-// #define BUILD_TARGET_LINUX
-```
 Build with CTRL + B.
 
 ## Config
@@ -36,6 +28,9 @@ Here is a guide to the keybinds:
 | Trigger               |LT                         |RT                          |
 | Thumbstick In |LJ                            |RJ                          |
 | None | NAN | NAN |
+
+> [!NOTE]
+> This is only avaliable with non-mini builds, if you have a _Mini dll, press Left + Right secondary to open or download another build.
 
 Here is the default configuration:
 ```
