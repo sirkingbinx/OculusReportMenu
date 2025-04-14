@@ -8,7 +8,7 @@ You can install this mod with [MonkeModManager](https://github.com/the-graze/mon
 
 > Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [my mod manager (wip)](https://github.com/sirkingbinx/binxmodmanager)
 
-Source URL for BMM: `https://raw.githubusercontent.com/sirkingbinx/OculusReportMenu/blob/master/ORMBuilds.json`
+Source URL for BMM: `https://raw.githubusercontent.com/sirkingbinx/OculusReportMenu/master/ORMBuilds.json`
 
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
