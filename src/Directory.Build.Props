@@ -12,7 +12,4 @@
 		<PluginsPath>.\Libs</PluginsPath>
 		<WarningLevel>0</WarningLevel>
 	</PropertyGroup>
-	<PropertyGroup>
-		<ORMBuildTarget>ChangeMeInDBProps</ORMBuildTarget>
-	</PropertyGroup>
 </Project>

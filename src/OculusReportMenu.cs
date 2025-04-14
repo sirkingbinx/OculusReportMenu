@@ -2,8 +2,11 @@
 // (C) Copyright 2024 - 2025 binx
 // MIT License
 
-// #define BUILD_TARGET_WIN
-// #define BUILD_TARGET_LINUX
+// build settings
+// just choose options
+
+// #define BUILD_EVERYTHING // big big build for all the features
+// #define BUILD_OCULUS_ONLY // only oculus stuff
 
 using BepInEx;
 using HarmonyLib;
@@ -18,10 +21,6 @@ using Valve.VR;
 using System.Collections;
 using OculusReportMenu.Patches;
 
-#if (!BUILD_TARGET_WIN && !BUILD_TARGET_LINUX)
-    #error No build target defined. Please uncomment BUILD_TARGET_(x).
-#endif
-
 namespace OculusReportMenu {
     public class ModInfo {
         public const string UUID = "kingbingus.oculusreportmenu";
@@ -32,8 +31,7 @@ namespace OculusReportMenu {
     [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-
-#if (BUILD_TARGET_WIN)
+#if (BUILD_EVERYTHING)
         // custom stuff
         internal static ConfigEntry<string> OpenButton1, OpenButton2;
 #endif
@@ -42,20 +40,24 @@ namespace OculusReportMenu {
         internal static bool Menu, ModEnabled;
         internal static GorillaMetaReport MetaReportMenu;
 
+#if (!BUILD_OCULUS_ONLY)
         internal static bool usingSteamVR;
 
-        internal static MethodInfo CheckDistance, CheckReportSubmit/*, ShowMetaMenu*/;
+        internal static MethodInfo CheckDistance, CheckReportSubmit;
+#endif
 
         bool IsNull(object thing) => thing != null ? false : true;
 
         void Update()
         {
-            if (IsNull(CheckDistance) || IsNull(CheckDistance) /*|| IsNull(ShowMetaMenu)*/)
+#if (!BUILD_OCULUS_ONLY)
+            if (IsNull(CheckDistance) || IsNull(CheckDistance))
             {
                 CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
                 // ShowMetaMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
             }
+#endif
 
             if (Menu)
             {
@@ -63,6 +65,7 @@ namespace OculusReportMenu {
                 GTPlayer.Instance.disableMovement = false;
                 GTPlayer.Instance.inOverlay = false;
 
+#if (!BUILD_OCULUS_ONLY)
                 // get stuff
                 GameObject occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");// (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("occluder").GetValue()
                 GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
@@ -74,17 +77,18 @@ namespace OculusReportMenu {
 
                 CheckDistance.Invoke(MetaReportMenu, null);
                 CheckReportSubmit.Invoke(MetaReportMenu, null);
+#endif
             }
             else if (GetControllerPressed() && ModEnabled) { ShowMenu(); }
         }
 
-#if (BUILD_TARGET_WIN)
-        internal bool GetControllerPressed() => CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) || Keyboard.current.tabKey.wasPressedThisFrame;
-#elif (BUILD_TARGET_LINUX)
-        internal bool GetControllerPressed() => ControllerInputPoller.instance.leftControllerSecondaryButton || Keyboard.current.tabKey.wasPressedThisFrame;
-#else
-        internal bool GetControllerPressed() => false;
-#endif
+        internal bool GetControllerPressed() { 
+            #if (BUILD_EVERYTHING) 
+                return CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) | Keyboard.current.tabKey.wasPressedThisFrame;
+            #else
+                return (ControllerInputPoller.instance.leftControllerSecondaryButton && ControllerInputPoller.instance.rightControllerSecondaryButton) | Keyboard.current.tabKey.wasPressedThisFrame;
+            #endif
+        }
 
         internal static void ShowMenu()
         {
@@ -101,9 +105,9 @@ namespace OculusReportMenu {
         public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(ModInfo.UUID); }
         public void OnDisable() { ModEnabled = false; HarmonyPatches.RemoveHarmonyPatches(); }
 
+#if (BUILD_EVERYTHING)
         void Awake()
         {
-#if (BUILD_TARGET_WIN)
             OpenButton1 = Config.Bind("Keybinds",
                                       "OpenButton1",
                                       "LS",
@@ -113,12 +117,10 @@ namespace OculusReportMenu {
                                       "OpenButton2",
                                       "RJ",
                                       "One of the buttons you use to open ORM (NAN for none)");
-#endif
         }
 
         // checks for the right key
 
-#if (BUILD_TARGET_WIN)
         internal static bool CheckButtonPressedStatus(ConfigEntry<string> thisEntry)
         {
             bool temporarySClick = false;
@@ -157,8 +159,8 @@ namespace OculusReportMenu {
 
             return false;
         }
-#endif
     }
+#endif
 
     [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")] // GorillaMetaReport.Teardown() is called when X is pressed
     public class CheckMenuClosed
@@ -176,9 +178,10 @@ namespace OculusReportMenu {
         {
             Plugin.MetaReportMenu = __instance;
 
+#if (!BUILD_OCULUS_ONLY)
             Plugin.CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
             Plugin.CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-            // Plugin.ShowMetaMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
+#endif        
         }
     }
 
@@ -191,6 +194,7 @@ namespace OculusReportMenu {
         }
     }
 
+#if (!BUILD_OCULUS_ONLY)
     [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
     public class GetPlayfabGameVersionPatch
     {
@@ -203,3 +207,4 @@ namespace OculusReportMenu {
         }
     }
 }
+#endif
