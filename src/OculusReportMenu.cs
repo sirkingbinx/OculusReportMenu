@@ -55,7 +55,6 @@ namespace OculusReportMenu {
             {
                 CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-                // ShowMetaMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
             }
 #endif
 
@@ -185,6 +184,7 @@ namespace OculusReportMenu {
         }
     }
 
+#if (!BUILD_OCULUS_ONLY)
     [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
     public class ForceDontSetHandsManually
     {
@@ -194,7 +194,6 @@ namespace OculusReportMenu {
         }
     }
 
-#if (!BUILD_OCULUS_ONLY)
     [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
     public class GetPlayfabGameVersionPatch
     {
