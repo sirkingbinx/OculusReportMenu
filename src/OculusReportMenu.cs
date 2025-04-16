@@ -2,11 +2,8 @@
 // (C) Copyright 2024 - 2025 binx
 // MIT License
 
-// build settings
-// just choose options
-
-// #define BUILD_EVERYTHING // big big build for all the features
-// #define BUILD_OCULUS_ONLY // only oculus stuff
+// #define BUILD_MINI
+// #define PLATFORM_OCULUS
 
 using BepInEx;
 using HarmonyLib;
@@ -22,16 +19,10 @@ using System.Collections;
 using OculusReportMenu.Patches;
 
 namespace OculusReportMenu {
-    public class ModInfo {
-        public const string UUID = "kingbingus.oculusreportmenu";
-        public const string Name = "OculusReportMenu";
-        public const string Version = "1.2.1";
-    }
-
     [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-#if (BUILD_EVERYTHING)
+#if (!BUILD_MINI)
         // custom stuff
         internal static ConfigEntry<string> OpenButton1, OpenButton2;
 #endif
@@ -40,17 +31,16 @@ namespace OculusReportMenu {
         internal static bool Menu, ModEnabled;
         internal static GorillaMetaReport MetaReportMenu;
 
-#if (!BUILD_OCULUS_ONLY)
         internal static bool usingSteamVR;
-
+#if (!PLATFORM_OCULUS)
         internal static MethodInfo CheckDistance, CheckReportSubmit;
-#endif
 
         bool IsNull(object thing) => thing != null ? false : true;
+#endif
 
         void Update()
         {
-#if (!BUILD_OCULUS_ONLY)
+#if (!PLATFORM_OCULUS)
             if (IsNull(CheckDistance) || IsNull(CheckDistance))
             {
                 CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -64,7 +54,7 @@ namespace OculusReportMenu {
                 GTPlayer.Instance.disableMovement = false;
                 GTPlayer.Instance.inOverlay = false;
 
-#if (!BUILD_OCULUS_ONLY)
+#if (!PLATFORM_OCULUS)
                 // get stuff
                 GameObject occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");// (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("occluder").GetValue()
                 GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
@@ -82,11 +72,11 @@ namespace OculusReportMenu {
         }
 
         internal bool GetControllerPressed() { 
-            #if (BUILD_EVERYTHING) 
+#if (!BUILD_MINI) 
                 return CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) | Keyboard.current.tabKey.wasPressedThisFrame;
-            #else
+#else
                 return (ControllerInputPoller.instance.leftControllerSecondaryButton && ControllerInputPoller.instance.rightControllerSecondaryButton) | Keyboard.current.tabKey.wasPressedThisFrame;
-            #endif
+#endif
         }
 
         internal static void ShowMenu()
@@ -104,7 +94,7 @@ namespace OculusReportMenu {
         public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(ModInfo.UUID); }
         public void OnDisable() { ModEnabled = false; HarmonyPatches.RemoveHarmonyPatches(); }
 
-#if (BUILD_EVERYTHING)
+#if (!BUILD_MINI)
         void Awake()
         {
             OpenButton1 = Config.Bind("Keybinds",
@@ -177,14 +167,14 @@ namespace OculusReportMenu {
         {
             Plugin.MetaReportMenu = __instance;
 
-#if (!BUILD_OCULUS_ONLY)
+#if (!PLATFORM_OCULUS)
             Plugin.CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
             Plugin.CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
 #endif        
         }
     }
 
-#if (!BUILD_OCULUS_ONLY)
+#if (!PLATFORM_OCULUS)
     [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
     public class ForceDontSetHandsManually
     {
@@ -193,6 +183,7 @@ namespace OculusReportMenu {
             GTPlayer.Instance.InReportMenu = false;
         }
     }
+#endif
 
     [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
     public class GetPlayfabGameVersionPatch
@@ -206,4 +197,3 @@ namespace OculusReportMenu {
         }
     }
 }
-#endif
