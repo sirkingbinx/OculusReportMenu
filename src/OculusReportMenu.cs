@@ -5,6 +5,8 @@
 // #define BUILD_WINDOWS
 // #define BUILD_LINUX
 
+// #define BUILD_RC
+
 using BepInEx;
 using HarmonyLib;
 using System.Reflection;
@@ -19,7 +21,9 @@ using System.Collections;
 using OculusReportMenu.Patches;
 
 #if (!BUILD_LINUX && !BUILD_WINDOWS)
-    #error "No build target defined."
+    #error "No build target defined. OculusReportMenu.cs"
+#else if (BUILD_LINUX && BUILD_WINDOWS)
+    #error "Only choose one build target. OculusReportMenu.cs"
 #endif
 
 namespace OculusReportMenu {
@@ -28,14 +32,24 @@ namespace OculusReportMenu {
         *   Why two mod infos?
         *   It's just for debugging purposes
         */
+        public const string Version = "1.3.0";
+        public const string RC = "rc1" // either RC{X} or stable
+        public const string VisualVersion = $"{Version}-{RC}";
+#if (BUILD_RC)
 #if (BUILD_WINDOWS)
+        // debug windows build
         public const string UUID = "kingbingus.oculusreportmenu.win";
-        public const string Name = "orm-windows";
-        public const string Version = "1.2.1";
+        public const string Name = $"orm-windows-{VisualVersion}";
 #else if (BUILD_LINUX)
+        // debug linux build
         public const string UUID = "kingbingus.oculusreportmenu.linux";
-        public const string Name = "orm-linux";
-        public const string Version = "1.2.1";
+        public const string Name = $"orm-linux-{VisualVersion}";
+#endif
+#elseif
+        // release (everything)
+        public const string UUID = "kingbingus.oculusreportmenu";
+        public const string Name = $"OculusReportMenu";
+#endif
     }
 
     [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
