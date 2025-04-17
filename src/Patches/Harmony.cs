@@ -15,11 +15,11 @@ namespace OculusReportMenu.Patches
         public static bool IsPatched { get; private set; }
         public static string InstanceId = "";
 
-        internal static void ApplyHarmonyPatches(string thisInstanceId)
+        internal static void ApplyHarmonyPatches(BepInPlugin classToPatch)
         {
             if (!IsPatched)
             {
-                if (InstanceId == "") InstanceId = thisInstanceId;
+                if (InstanceId == "") InstanceId = classToPatch.Info.Metadata.GUID;
 
                 if (instance == null)
                     instance = new Harmony(InstanceId);
