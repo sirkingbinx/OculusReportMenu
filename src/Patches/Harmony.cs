@@ -2,6 +2,7 @@
 // (C) Copyright 2024 - 2025 Bingus Bingusington
 // MIT License
 
+using BepInEx;
 using HarmonyLib;
 using System;
 using System.Reflection;
@@ -15,11 +16,11 @@ namespace OculusReportMenu.Patches
         public static bool IsPatched { get; private set; }
         public static string InstanceId = "";
 
-        internal static void ApplyHarmonyPatches(string thisInstanceId)
+        internal static void ApplyHarmonyPatches(BaseUnityPlugin pluginInstance)
         {
             if (!IsPatched)
             {
-                if (InstanceId == "") InstanceId = thisInstanceId;
+                if (InstanceId == "") InstanceId = pluginInstance.Info.Metadata.GUID;
 
                 if (instance == null)
                     instance = new Harmony(InstanceId);

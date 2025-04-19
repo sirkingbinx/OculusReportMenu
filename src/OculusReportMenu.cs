@@ -2,9 +2,6 @@
 // (C) Copyright 2024 - 2025 binx
 // MIT License
 
-// #define BUILD_MINI
-// #define PLATFORM_OCULUS
-
 using BepInEx;
 using HarmonyLib;
 using System.Reflection;
@@ -15,38 +12,31 @@ using GorillaNetworking;
 using GorillaLocomotion;
 using BepInEx.Configuration;
 using Valve.VR;
-using System.Collections;
 using OculusReportMenu.Patches;
 
 namespace OculusReportMenu {
-    [BepInPlugin(ModInfo.UUID, ModInfo.Name, ModInfo.Version)]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "1.2.1")]
     public class Plugin : BaseUnityPlugin
     {
-#if (!BUILD_MINI)
         // custom stuff
         internal static ConfigEntry<string> OpenButton1, OpenButton2;
-#endif
 
         // base things
         internal static bool Menu, ModEnabled;
         internal static GorillaMetaReport MetaReportMenu;
 
         internal static bool usingSteamVR;
-#if (!PLATFORM_OCULUS)
         internal static MethodInfo CheckDistance, CheckReportSubmit;
 
         bool IsNull(object thing) => thing != null ? false : true;
-#endif
 
         void Update()
         {
-#if (!PLATFORM_OCULUS)
             if (IsNull(CheckDistance) || IsNull(CheckDistance))
             {
                 CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
             }
-#endif
 
             if (Menu)
             {
@@ -54,7 +44,6 @@ namespace OculusReportMenu {
                 GTPlayer.Instance.disableMovement = false;
                 GTPlayer.Instance.inOverlay = false;
 
-#if (!PLATFORM_OCULUS)
                 // get stuff
                 GameObject occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");// (GameObject)Traverse.Create(typeof(GorillaMetaReport)).Field("occluder").GetValue()
                 GameObject metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent"); 
@@ -66,18 +55,11 @@ namespace OculusReportMenu {
 
                 CheckDistance.Invoke(MetaReportMenu, null);
                 CheckReportSubmit.Invoke(MetaReportMenu, null);
-#endif
             }
             else if (GetControllerPressed() && ModEnabled) { ShowMenu(); }
         }
 
-        internal bool GetControllerPressed() { 
-#if (!BUILD_MINI) 
-                return CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) | Keyboard.current.tabKey.wasPressedThisFrame;
-#else
-                return (ControllerInputPoller.instance.leftControllerSecondaryButton && ControllerInputPoller.instance.rightControllerSecondaryButton) | Keyboard.current.tabKey.wasPressedThisFrame;
-#endif
-        }
+        internal bool GetControllerPressed() => CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2) | Keyboard.current.tabKey.wasPressedThisFrame;
 
         internal static void ShowMenu()
         {
@@ -91,10 +73,9 @@ namespace OculusReportMenu {
             }
         }
 
-        public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(ModInfo.UUID); }
+        public void OnEnable() { ModEnabled = true; HarmonyPatches.ApplyHarmonyPatches(this); }
         public void OnDisable() { ModEnabled = false; HarmonyPatches.RemoveHarmonyPatches(); }
 
-#if (!BUILD_MINI)
         void Awake()
         {
             OpenButton1 = Config.Bind("Keybinds",
@@ -149,51 +130,26 @@ namespace OculusReportMenu {
             return false;
         }
     }
-#endif
 
-    [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")] // GorillaMetaReport.Teardown() is called when X is pressed
-    public class CheckMenuClosed
+    public class GamePatches
     {
-        static void Postfix()
-        {
-            Plugin.Menu = false;
-        }
-    }
+        /*
+         * hey AA devs plz don't patch OculusReportMenu i really like getting cheaters banned
+         * pls dm me on discord if you want this taken down i just want cheaters gone man
+         * 
+         * <3 sirkingbinx
+         */
 
-    [HarmonyPatch(typeof(GorillaMetaReport), "Start")] // Getting the Script when it starts
-    public class CheckMenuStart
-    {
-        static void Postfix(GorillaMetaReport __instance) //has to be called this
-        {
-            Plugin.MetaReportMenu = __instance;
+        [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
+        static void StartPatch(GorillaMetaReport __instance) => Plugin.MetaReportMenu = __instance;
 
-#if (!PLATFORM_OCULUS)
-            Plugin.CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-            Plugin.CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-#endif        
-        }
-    }
+        [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
+        static void SteamPatch() => GTPlayer.Instance.InReportMenu = false;
 
-#if (!PLATFORM_OCULUS)
-    [HarmonyPatch(typeof(GorillaMetaReport), "Update")] // when gorilla tag for SteamVR detects this it automatically closes it for some reason, this fixes that problem
-    public class ForceDontSetHandsManually
-    {
-        static void Postfix()
-        {
-            GTPlayer.Instance.InReportMenu = false;
-        }
-    }
-#endif
+        [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")]
+        static void MenuCloseHook() => Plugin.Menu = false;
 
-    [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
-    public class GetPlayfabGameVersionPatch
-    {
-        static void Postfix()
-        {
-            if (PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam"))
-            {
-                Plugin.usingSteamVR = true;
-            }
-        }
+        [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
+        static void CheckPlatform() => Plugin.usingSteamVR = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
     }
 }
