@@ -1,5 +1,5 @@
 // OculusReportMenu
-// (C) Copyright 2024 - 2025 Bingus Bingusington
+// (C) Copyright 2024 - 2025 binx
 // MIT License
 
 using BepInEx;

@@ -1,4 +1,4 @@
-# Oculus Report Menu for PCVR ![all](https://img.shields.io/github/downloads/bingus-dev/OculusReportMenu/total)
+# OculusReportMenu ![all](https://img.shields.io/github/downloads/sirkingbinx/OculusReportMenu/total)
 This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift / Quest Link. Activate by pressing your right thumbstick in and clicking your left secondary button.
 
 ## Installation
@@ -6,9 +6,9 @@ This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift
 You can install this mod with [MonkeModManager](https://github.com/the-graze/monkemodmanager), look for "OculusReportMenu" under "Tweaks / Tools" <br>
 ![image](https://github.com/user-attachments/assets/21879ee0-dd12-446f-9a3b-8782fae407fb)
 
-> Note: You can install this with [Graze / new UI MMM](https://github.com/the-graze/monkemodmanager), [Ngbatz / old UI MMM](https://github.com/ngbatzyt/monkemodmanager), or [my mod manager (wip)](https://github.com/sirkingbinx/binxmodmanager)
+> Note: You can install this with [MonkeModManager](https://github.com/the-graze/monkemodmanager) or [my own mod manager](https://github.com/sirkingbinx/binxmodmanager)
 
-Source URL for BMM: `https://raw.githubusercontent.com/sirkingbinx/OculusReportMenu/master/ORMBuilds.json`
+Source URL: `https://raw.githubusercontent.com/sirkingbinx/OculusReportMenu/master/ORMBuilds.json`
 
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
@@ -30,9 +30,6 @@ Here is a guide to the keybinds:
 | Trigger               |LT                         |RT                          |
 | Thumbstick In |LJ                            |RJ                          |
 | None | NAN | NAN |
-
-> [!NOTE]
-> This is only avaliable with non-mini builds, if you have a _Mini dll, press Left + Right secondary to open or download another build.
 
 Here is the default configuration:
 ```

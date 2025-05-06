@@ -21,10 +21,10 @@ namespace OculusReportMenu {
     public class Plugin : BaseUnityPlugin
     {
         // custom stuff
+        internal static bool Menu;
         internal static ConfigEntry<string> OpenButton1, OpenButton2;
 
         // base things
-        internal static bool Menu, ModEnabled;
         internal static GorillaMetaReport MetaReportMenu;
 
         internal static bool usingSteamVR;
@@ -36,19 +36,11 @@ namespace OculusReportMenu {
 
         void Update()
         {
-            if (IsNull(CheckDistance) || IsNull(CheckDistance))
-            {
-                CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-                CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-
             if (Menu)
             {
-                // hide the fact that they're in report menu to prevent comp cheating
                 GTPlayer.Instance.disableMovement = false;
                 GTPlayer.Instance.inOverlay = false;
 
-                // update stuff
                 Plugin.occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
                 Plugin.metaLeftHand.transform.SetPositionAndRotation(GorillaTagger.Instance.offlineVRRig.leftHandTransform.position, GorillaTagger.Instance.offlineVRRig.leftHandTransform.rotation);
@@ -57,10 +49,10 @@ namespace OculusReportMenu {
                 CheckDistance.Invoke(MetaReportMenu, null);
                 CheckReportSubmit.Invoke(MetaReportMenu, null);
             }
-            else if (GetControllerPressed() && ModEnabled) { ShowMenu(); }
+            else if (GetControllerPressed()) { ShowMenu(); }
         }
 
-        internal sbool GetControllerPressed() => (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2)) | Keyboard.current.tabKey.wasPressedThisFrame;
+        internal static bool GetControllerPressed() => (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2)) | Keyboard.current.tabKey.wasPressedThisFrame;
 
         internal static void ShowMenu()
         {
@@ -76,9 +68,6 @@ namespace OculusReportMenu {
 
         public void Start() => HarmonyPatches.ApplyHarmonyPatches(this);
 
-        public void OnEnable() => ModEnabled = true;
-        public void OnDisable() => ModEnabled = false;
-
         void Awake()
         {
             OpenButton1 = Config.Bind("Keybinds",
@@ -91,8 +80,6 @@ namespace OculusReportMenu {
                                       "RJ",
                                       "One of the buttons you use to open ORM (NAN for none)");
         }
-
-        // checks for the right key
 
         internal static bool CheckButtonPressedStatus(ConfigEntry<string> thisEntry)
         {
@@ -134,13 +121,6 @@ namespace OculusReportMenu {
 
     public class GamePatches
     {
-        /*
-         * hey AA devs plz don't patch OculusReportMenu i really like getting cheaters banned
-         * pls dm me on discord if you want this taken down i just want cheaters gone man
-         * 
-         * <3 sirkingbinx
-         */
-
         [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
         static void StartPatch(GorillaMetaReport __instance)
         {
