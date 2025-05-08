@@ -56,17 +56,37 @@ namespace OculusReportMenu {
 
         internal static void ShowMenu()
         {
-            if (!Menu)
+            if (!Menu && MetaReportMenu != null)
             {
-                MetaReportMenu.gameObject.SetActive(true);
-                MetaReportMenu.enabled = true;
+                if (MetaReportMenu != null)
+                {
+                    MetaReportMenu.gameObject.SetActive(true);
+                    MetaReportMenu.enabled = true;
 
-                typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(MetaReportMenu, null);
-                Menu = true;
+                    object[] args = { false };
+                    typeof(GorillaMetaReport).GetMethod("StartOverlay").Invoke(MetaReportMenu, args);
+
+                    Menu = true;
+                } else
+                {
+                    Debug.Log("tried invoking ShowMenu but there is no MetaReportMenu!!!!!!!!!!!!!!!!!");
+                }
             }
         }
 
-        public void Start() => HarmonyPatches.ApplyHarmonyPatches(this);
+        public void Start()
+        {
+            HarmonyPatches.ApplyHarmonyPatches(this);
+
+            occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
+            metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
+            metaRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+
+            MetaReportMenu = occluder.GetComponent<GorillaMetaReport>();
+
+            CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
+            CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
 
         void Awake()
         {
@@ -121,19 +141,6 @@ namespace OculusReportMenu {
 
     public class GamePatches
     {
-        [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
-        static void StartPatch(GorillaMetaReport __instance)
-        {
-            Plugin.MetaReportMenu = __instance;
-
-            Plugin.CheckDistance = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-            Plugin.CheckReportSubmit = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            Plugin.occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
-            Plugin.metaLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
-            Plugin.metaRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-        }
-
         [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
         static void SteamPatch() => GTPlayer.Instance.InReportMenu = false;
 
