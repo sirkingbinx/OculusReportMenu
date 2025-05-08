@@ -9,11 +9,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using GorillaNetworking;
 using GorillaLocomotion;
+using UnityEngine.XR;
+using Valve.VR;
 
 namespace OculusReportMenu
 {
     [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.0.0")]
-    internal class Plugin
+    internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
 
@@ -22,63 +24,93 @@ namespace OculusReportMenu
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu;
 
         internal bool ShowingMenu = false;
-        internal bool ModEnabled = false;
+        internal bool isSteam;
+        internal bool ModEnabled, RJ;
 
         // plugin
 
-        internal void Start() => new Harmony("kingbingus.oculusreportmenu");PatchAll(Assembly.GetExecutingAssembly());
+        internal void Start()
+        {
+            Harmony.CreateAndPatchAll(GetType().Assembly, "kingbingus.oculusreportmenu");
+
+            GorillaTagger.OnPlayerSpawned(delegate
+            {
+                var MetaReportMenu = Resources.FindObjectsOfTypeAll<GorillaMetaReport>();
+                foreach (GorillaMetaReport m in MetaReportMenu)
+                {
+                    Menu = m;
+                }
+
+                ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
+                ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
+                ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+
+                UpdatePosition =
+                    typeof(GorillaMetaReport).GetMethod("CheckDistance",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                OpenMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+            });
+        }
 
         internal void OnEnable() => ModEnabled = true;
         internal void OnDisable() => ModEnabled = false;
 
         internal void Update()
         {
-            if (!ShowingMenu && ButtonsPressed())
+            if (Menu != null)
             {
-                MetaReportMenu.gameObject.SetActive(true);
-                MetaReportMenu.enabled = true;
+                if (isSteam)
+                    RJ = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
+                else
+                    InputDevices.GetDeviceAtXRNode(XRNode.RightHand)
+                        .TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out RJ);
 
-                OpenMenu.Invoke(MetaReportMenu, null);
-                ShowingMenu = true;
-            } else {
-                GTPlayer.Instance.disableMovement = false;
-                GTPlayer.Instance.inOverlay = false;
+                if (ShowingMenu)
+                {
+                    GTPlayer.Instance.disableMovement = false;
+                    GTPlayer.Instance.inOverlay = false;
 
-                Occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
+                    ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
-                ORMLeftHand.transform.SetPositionAndRotation(GorillaTagger.Instance.offlineVRRig.leftHandTransform.position, GorillaTagger.Instance.offlineVRRig.leftHandTransform.rotation);
-                ORMRightHand.transform.SetPositionAndRotation(GorillaTagger.Instance.offlineVRRig.rightHandTransform.position, GorillaTagger.Instance.offlineVRRig.rightHandTransform.rotation);
+                    ORMRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position,
+                        GTPlayer.Instance.rightControllerTransform.rotation);
+                    ORMLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position,
+                        GTPlayer.Instance.leftControllerTransform.rotation);
 
-                UpdatePosition.Invoke(MetaReportMenu, null);
-                CheckReports.Invoke(MetaReportMenu, null);
+                    UpdatePosition.Invoke(Menu, null);
+                    CheckReports.Invoke(Menu, null);
+                }
+                else if (RJ && ControllerInputPoller.instance.leftControllerSecondaryButton)
+                {
+                    object[] args = { false };
+
+                    Menu.gameObject.SetActive(true);
+                    Menu.enabled = true;
+
+                    OpenMenu.Invoke(Menu, args);
+                    ShowingMenu = true;
+                }
+            }
+
+            if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
+            { 
+                ShowingMenu = false;
             }
         }
+    }
 
-        internal void ButtonsPressed() => (ControllerInputPoller.instance.leftControllerSecondaryButton && ControllerInputPoller.instance.leftControllerSecondaryButton) | Keyboard.current.tabKey.wasPressedThisFrame;
+    [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
+    internal class OnOculusUpdate
+    {
+        static void Postfix() => GTPlayer.Instance.InReportMenu = false;
+    }
 
-        // patches
-
-        [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
-        static void OnOculusInit(GorillaMetaReport creatingMenu)
-        {
-            Menu = creatingMenu;
-
-            ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
-            ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
-            ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-
-            UpdatePosition = typeof(GorillaMetaReport).GetMethod("CheckDistance", BindingFlags.NonPublic | BindingFlags.Instance);
-            OpenMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay", BindingFlags.NonPublic | BindingFlags.Instance);
-            CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit", BindingFlags.NonPublic | BindingFlags.Instance);
-        }
-
-        [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
-        static void OnOculusUpdate() => GTPlayer.Instance.InReportMenu = false;
-
-        [HarmonyPatch(typeof(GorillaMetaReport), "Teardown")]
-        static void OnOculusClose() => Plugin.Menu = false;
-
-        [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
-        static void OnComputerInit() => Plugin.usingSteamVR = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+    [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
+    public class OnComputerInit
+    {
+        static void Postfix() => Plugin.instance.isSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
     }
 }
