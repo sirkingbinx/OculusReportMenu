@@ -22,7 +22,7 @@ namespace OculusReportMenu
 
         internal GorillaMetaReport Menu;
         internal GameObject ORMOccluder, ORMLeftHand, ORMRightHand;
-        internal MethodInfo UpdatePosition, CheckReports, OpenMenu;
+        internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
         internal bool ShowingMenu = false;
         internal bool isSteam;
@@ -55,6 +55,8 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
                     BindingFlags.NonPublic | BindingFlags.Instance);
+                Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
             });
         }
 
@@ -69,7 +71,7 @@ namespace OculusReportMenu
                     (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2))
                     | Keyboard.current.tabKey.wasPressedThisFrame;
 
-                if (ShowingMenu)
+                if (ShowingMenu && !ButtonsPressed)
                 {
                     GTPlayer.Instance.disableMovement = false;
                     GTPlayer.Instance.inOverlay = false;
@@ -83,6 +85,9 @@ namespace OculusReportMenu
 
                     UpdatePosition.Invoke(Menu, null);
                     CheckReports.Invoke(Menu, null);
+                } else if (ShowingMenu && ButtonsPressed)
+                {
+                    Teardown.Invoke(Menu, null);
                 }
                 else if (ButtonsPressed)
                 {
@@ -97,7 +102,7 @@ namespace OculusReportMenu
             }
 
             if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
-            { 
+            {
                 ShowingMenu = false;
             }
         }
