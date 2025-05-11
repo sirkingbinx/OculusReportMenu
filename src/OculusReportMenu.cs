@@ -2,16 +2,22 @@
 // (C) Copyright 2024 - 2025 binx
 // MIT License
 
+// Patchers
 using BepInEx;
 using HarmonyLib;
+
+// System
 using System.Reflection;
+
+// Engine
 using UnityEngine;
 using UnityEngine.InputSystem;
-using GorillaNetworking;
-using GorillaLocomotion;
 using UnityEngine.XR;
 using Valve.VR;
-using BepInEx.Configuration;
+
+// GT
+using GorillaNetworking;
+using GorillaLocomotion;
 
 namespace OculusReportMenu
 {
@@ -20,26 +26,23 @@ namespace OculusReportMenu
     {
         internal static Plugin instance;
 
-        internal GorillaMetaReport Menu;
+        private GorillaMetaReport Menu;
         internal GameObject ORMOccluder, ORMLeftHand, ORMRightHand;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
-
-        internal bool ShowingMenu = false;
-        internal bool isSteam;
-        internal bool ModEnabled, ButtonsPressed;
+        
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam;
 
         internal string OpenButton1, OpenButton2;
 
         // plugin
 
-        internal void Start()
-        {
+        internal void Start() {
             Harmony.CreateAndPatchAll(GetType().Assembly, "kingbingus.oculusreportmenu");
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
-                var MetaReportMenu = Resources.FindObjectsOfTypeAll<GorillaMetaReport>();
-                foreach (GorillaMetaReport m in MetaReportMenu)
+                var metaReportMenu = Resources.FindObjectsOfTypeAll<GorillaMetaReport>();
+                foreach (GorillaMetaReport m in metaReportMenu)
                 {
                     Menu = m;
                 }
@@ -60,46 +63,47 @@ namespace OculusReportMenu
             });
         }
 
-        internal void OnEnable() => ModEnabled = true;
-        internal void OnDisable() => ModEnabled = false;
-
-        internal void Update()
-        {
-            if (Menu != null)
-            {
+        internal void Update() {
+            if (!Menu) {
                 ButtonsPressed =
                     (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2))
                     | Keyboard.current.tabKey.wasPressedThisFrame;
 
-                if (ShowingMenu && !ButtonsPressed)
-                {
-                    GTPlayer.Instance.disableMovement = false;
-                    GTPlayer.Instance.inOverlay = false;
+                switch (ShowingMenu) {
+                    case true:
+                        if (!ButtonsPressed) {
+                            GTPlayer.Instance.disableMovement = false;
+                            GTPlayer.Instance.inOverlay = false;
 
-                    ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
+                            ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
-                    ORMRightHand.transform.SetPositionAndRotation(GTPlayer.Instance.rightControllerTransform.position,
-                        GTPlayer.Instance.rightControllerTransform.rotation);
-                    ORMLeftHand.transform.SetPositionAndRotation(GTPlayer.Instance.leftControllerTransform.position,
-                        GTPlayer.Instance.leftControllerTransform.rotation);
+                            ORMRightHand.transform.SetPositionAndRotation(
+                                GTPlayer.Instance.rightControllerTransform.position,
+                                GTPlayer.Instance.rightControllerTransform.rotation);
+                            ORMLeftHand.transform.SetPositionAndRotation(
+                                GTPlayer.Instance.leftControllerTransform.position,
+                                GTPlayer.Instance.leftControllerTransform.rotation);
 
-                    UpdatePosition.Invoke(Menu, null);
-                    CheckReports.Invoke(Menu, null);
-                } else if (ShowingMenu && ButtonsPressed)
-                {
-                    Teardown.Invoke(Menu, null);
-                    Menu.gameObject.SetActive(false);
-                    ShowingMenu = false;
-                }
-                else if (ButtonsPressed)
-                {
-                    object[] args = { false };
+                            UpdatePosition.Invoke(Menu, null);
+                            CheckReports.Invoke(Menu, null);
+                        } else {
+                            Teardown.Invoke(Menu, null);
+                            Menu.gameObject.SetActive(false);
+                            ShowingMenu = false;
+                        }
 
-                    Menu.gameObject.SetActive(true);
-                    Menu.enabled = true;
+                        break;
+                    case false:
+                        if (ButtonsPressed) {
+                            object[] args = { false };
 
-                    OpenMenu.Invoke(Menu, args);
-                    ShowingMenu = true;
+                            Menu.gameObject.SetActive(true);
+                            Menu.enabled = true;
+
+                            OpenMenu.Invoke(Menu, args);
+                            ShowingMenu = true;
+                        }
+                        break;
                 }
             }
 
@@ -151,7 +155,7 @@ namespace OculusReportMenu
                 case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > 0.5f;
                 case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > 0.5f;
                 case "LJ":
-                    if (isSteam)
+                    if (PlatformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -164,7 +168,7 @@ namespace OculusReportMenu
                 case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
                 case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > 0.5f;
                 case "RJ":
-                    if (isSteam)
+                    if (PlatformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -186,7 +190,7 @@ namespace OculusReportMenu
         [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
         internal class OnComputerInit
         {
-            static void Postfix() => Plugin.instance.isSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+            static void Postfix() => instance.PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
         }
     }
 }
