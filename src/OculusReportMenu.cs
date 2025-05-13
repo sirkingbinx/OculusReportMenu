@@ -88,8 +88,6 @@ namespace OculusReportMenu
                             CheckReports.Invoke(Menu, null);
                         } else {
                             Teardown.Invoke(Menu, null);
-                            Menu.gameObject.SetActive(false);
-                            ShowingMenu = false;
                         }
 
                         break;
