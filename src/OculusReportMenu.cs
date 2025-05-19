@@ -1,5 +1,5 @@
 // OculusReportMenu
-// (C) Copyright 2024 - 2025 binx
+// (C) Copyright 2024 - 2025 bingus
 // MIT License
 
 // Patchers
@@ -21,32 +21,42 @@ using GorillaLocomotion;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.0.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.1.0")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
 
-        private GorillaMetaReport Menu;
+        internal GorillaMetaReport Menu;
         internal GameObject ORMOccluder, ORMLeftHand, ORMRightHand;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
         
         internal bool ShowingMenu, ButtonsPressed, PlatformSteam;
 
         internal string OpenButton1, OpenButton2;
+        internal float Sensitivity;
 
         // plugin
 
         internal void Start() {
             Harmony.CreateAndPatchAll(GetType().Assembly, "kingbingus.oculusreportmenu");
 
+            OpenButton1 = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            OpenButton2 = Config.Bind("Keybinds", "OpenButton2", "RJ", "One of the buttons you use to open ORM (NAN for none)").Value;
+            Sensitivity = Config.Bind("Input", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+
             GorillaTagger.OnPlayerSpawned(delegate
             {
-                var metaReportMenu = Resources.FindObjectsOfTypeAll<GorillaMetaReport>();
-                foreach (GorillaMetaReport m in metaReportMenu)
-                {
-                    Menu = m;
-                }
-
+                /*
+                i have no idea why this was the best way to do it, menu is now set in Harmony Patches
+                
+                    var metaReportMenu = Resources.FindObjectsOfTypeAll<GorillaMetaReport>();
+                    
+                    foreach (GorillaMetaReport m in metaReportMenu)
+                    {
+                        Menu = m;
+                    }
+                */
+            
                 ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
                 ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
                 ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
@@ -69,77 +79,36 @@ namespace OculusReportMenu
                     (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2))
                     | Keyboard.current.tabKey.wasPressedThisFrame;
 
-                switch (ShowingMenu) {
-                    case true:
-                        if (!ButtonsPressed) {
-                            GTPlayer.Instance.disableMovement = false;
-                            GTPlayer.Instance.inOverlay = false;
+                if (ShowingMenu) {
+                    GTPlayer.Instance.disableMovement = false;
+                    GTPlayer.Instance.inOverlay = false;
 
-                            ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
+                    ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
-                            ORMRightHand.transform.SetPositionAndRotation(
-                                GTPlayer.Instance.rightControllerTransform.position,
-                                GTPlayer.Instance.rightControllerTransform.rotation);
-                            ORMLeftHand.transform.SetPositionAndRotation(
-                                GTPlayer.Instance.leftControllerTransform.position,
-                                GTPlayer.Instance.leftControllerTransform.rotation);
+                    ORMRightHand.transform.SetPositionAndRotation(
+                        GTPlayer.Instance.rightControllerTransform.position,
+                        GTPlayer.Instance.rightControllerTransform.rotation);
+                    ORMLeftHand.transform.SetPositionAndRotation(
+                        GTPlayer.Instance.leftControllerTransform.position,
+                        GTPlayer.Instance.leftControllerTransform.rotation);
 
-                            UpdatePosition.Invoke(Menu, null);
-                            CheckReports.Invoke(Menu, null);
-                        } else {
-                            Teardown.Invoke(Menu, null);
-                        }
+                    UpdatePosition.Invoke(Menu, null);
+                    CheckReports.Invoke(Menu, null);
+                } else if (ButtonsPressed)
+                {
+                    object[] args = { true };
 
-                        break;
-                    case false:
-                        if (ButtonsPressed) {
-                            object[] args = { false };
+                    Menu.gameObject.SetActive(true);
+                    Menu.enabled = true;
 
-                            Menu.gameObject.SetActive(true);
-                            Menu.enabled = true;
-
-                            OpenMenu.Invoke(Menu, args);
-                            ShowingMenu = true;
-                        }
-                        break;
+                    OpenMenu.Invoke(Menu, args);
+                    ShowingMenu = true;
                 }
             }
 
             if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
-            {
                 ShowingMenu = false;
-            }
         }
-
-        void Awake()
-        {
-            /* key to configs
-             * P - primary
-             * S - secondary
-             * J - thumbstick
-             * T - trigger
-             * G - grip
-             * 
-             * L - left
-             * R - right
-             * 
-             * N - none (no keybind, make sure to set a key to the other one though)
-             * 
-             * examples: right trigger = RT, left secondary = LS
-             */
-
-            OpenButton1 = Config.Bind("Keybinds",
-                                      "OpenButton1",
-                                      "LS",
-                                      "One of the buttons you use to open ORM (NAN for none)").Value;
-
-            OpenButton2 = Config.Bind("Keybinds",
-                                      "OpenButton2",
-                                      "RJ",
-                                      "One of the buttons you use to open ORM (NAN for none)").Value;
-        }
-
-        // checks for the right key
 
         internal bool CheckButtonPressedStatus(string thisEntry)
         {
@@ -147,11 +116,10 @@ namespace OculusReportMenu
 
             switch (thisEntry.ToUpper())
             {
-                // left hand
                 case "LP": return ControllerInputPoller.instance.leftControllerPrimaryButton;
                 case "LS": return ControllerInputPoller.instance.leftControllerSecondaryButton;
-                case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > 0.5f;
-                case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > 0.5f;
+                case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
+                case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
                 case "LJ":
                     if (PlatformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
@@ -163,8 +131,8 @@ namespace OculusReportMenu
                 // right hand
                 case "RP": return ControllerInputPoller.instance.rightControllerPrimaryButton;
                 case "RS": return ControllerInputPoller.instance.rightControllerSecondaryButton;
-                case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
-                case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > 0.5f;
+                case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
+                case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
                 case "RJ":
                     if (PlatformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
@@ -173,22 +141,36 @@ namespace OculusReportMenu
 
                     return temporarySClick;
 
+                // NAN
                 case "NAN":
                     return true;
             }
+            
             return false;
         }
 
+        // GorillaMetaReport
         [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
         internal class OnOculusUpdate
         {
             static void Postfix() => GTPlayer.Instance.InReportMenu = false;
         }
 
+        [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
+        internal class OnReportInit
+        {
+            static void Postfix(GorillaMetaReport __instance) => Menu = __instance;
+        }
+
+        // GorillaComputer
         [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
         internal class OnComputerInit
         {
-            static void Postfix() => instance.PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+            static void Postfix() =>
+                instance.PlatformSteam =
+                    PlayFabAuthenticator.instance.platform.PlatformTag
+                    .ToLower()
+                    .Contains("steam");
         }
     }
 }
