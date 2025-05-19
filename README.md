@@ -6,9 +6,7 @@ This basic mod lets you access the Oculus Report Menu on SteamVR and Oculus Rift
 You can install this mod with [MonkeModManager](https://github.com/the-graze/monkemodmanager), look for "OculusReportMenu" under "Tweaks / Tools" <br>
 ![image](https://github.com/user-attachments/assets/21879ee0-dd12-446f-9a3b-8782fae407fb)
 
-> Note: You can install this with [MonkeModManager](https://github.com/the-graze/monkemodmanager) or [my own mod manager](https://github.com/sirkingbinx/binxmodmanager)
-
-Source URL: `https://raw.githubusercontent.com/sirkingbinx/OculusReportMenu/master/ORMBuilds.json`
+> Note: You can install this with [MonkeModManager](https://github.com/the-graze/monkemodmanager) or [my own mod manager](https://github.com/sirkingbinx/binxmodmanager). Use the MMM source to download
 
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
@@ -41,6 +39,11 @@ If you want to bind this to one button:
 ```
 openButton1 = LP
 openButton2 = NAN
+```
+
+You can also adjust the sensitivity for when it detects triggers and grips.
+```
+Sensitivity = 0.5
 ```
 
 ## Why?
