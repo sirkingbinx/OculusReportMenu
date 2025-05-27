@@ -21,9 +21,6 @@
 		<Reference Include="BepInEx">
 		  <HintPath>$(BepInExAssemblyPath)\BepInEx.dll</HintPath>
 		</Reference>
-		<Reference Include="CardboardLib">
-		  <HintPath>$(PluginsPath)\CardboardLib.dll</HintPath>
-		</Reference>
 		<Reference Include="Meta.XR.BuildingBlocks">
 		  <HintPath>$(GameAssemblyPath)\Meta.XR.BuildingBlocks.dll</HintPath>
 		</Reference>
