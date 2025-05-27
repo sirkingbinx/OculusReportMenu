@@ -48,7 +48,7 @@ namespace OculusReportMenu
         internal FieldInfo closeButton;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
-        internal bool ShowingMenu, ButtonsPressed;
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam;
 
         internal string OpenButton1, OpenButton2;
         internal float Sensitivity, blockButtonsUntilTimestamp;
@@ -130,23 +130,38 @@ namespace OculusReportMenu
 
         internal bool CheckButtonPressedStatus(string thisEntry)
         {
+            bool temporarySClick;
+
             switch (thisEntry.ToUpper())
             {
                 case "LP": return ControllerInputPoller.instance.leftControllerPrimaryButton;
                 case "LS": return ControllerInputPoller.instance.leftControllerSecondaryButton;
                 case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
                 case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
-                case "LJ": return ControllerInputPoller.instance.leftControllerSecondaryButton;
+                case "LJ":
+                    if (PlatformSteam)
+                        temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
+                    else
+                        InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
+
+                    return temporarySClick;
 
                 // right hand
                 case "RP": return ControllerInputPoller.instance.rightControllerPrimaryButton;
                 case "RS": return ControllerInputPoller.instance.rightControllerSecondaryButton;
                 case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
                 case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
-                case "RJ": return ControllerInputPoller.instance.rightControllerSecondaryButton;
+                case "RJ":
+                    if (PlatformSteam)
+                        temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
+                    else
+                        InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
+
+                    return temporarySClick;
 
                 // NAN
-                case "NAN": return true;
+                case "NAN":
+                    return true;
             }
             
             return false;
@@ -176,6 +191,17 @@ namespace OculusReportMenu
         {
             // This is necessary because the GGWP moderation uses the report menu to show stuff. This should make sure we don't make your game break; don't change it plz
             static void Postfix() => instance.ShowingMenu = true;
+        }
+
+        // GorillaComputer
+        [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
+        internal class OnComputerInit
+        {
+            static void Postfix() =>
+                instance.PlatformSteam =
+                    PlayFabAuthenticator.instance.platform.PlatformTag
+                    .ToLower()
+                    .Contains("steam");
         }
     }
 }
