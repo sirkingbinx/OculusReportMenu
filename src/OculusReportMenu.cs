@@ -19,25 +19,9 @@ using Valve.VR;
 using GorillaNetworking;
 using GorillaLocomotion;
 
-/*
- * Dear Another Axiom,
- * 
- * Please stop patching this mod.
- * As of right now, this is the only way to bypass anti-Oculus report on
- * cheat menus such as ii's Stupid Menu, ShibaGT Gold, and others.
- * 
- * By patching this mod, you only commit more to making the cheater problem
- * worse.
- * 
- * You can ban me from your servers or anything, just please leave this
- * mod functional. (my username is @sirkingbinx if you are considering this)
- * 
- * - bingus
- */
-
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.1.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.1.1")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -78,6 +62,8 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 closeButton = typeof(GorillaMetaReport).GetField("closeButton",
                     BindingFlags.NonPublic | BindingFlags.Instance);
+
+                PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
             });
         }
 
@@ -191,17 +177,6 @@ namespace OculusReportMenu
         {
             // This is necessary because the GGWP moderation uses the report menu to show stuff. This should make sure we don't make your game break; don't change it plz
             static void Postfix() => instance.ShowingMenu = true;
-        }
-
-        // GorillaComputer
-        [HarmonyPatch(typeof(GorillaComputer), "Initialise")]
-        internal class OnComputerInit
-        {
-            static void Postfix() =>
-                instance.PlatformSteam =
-                    PlayFabAuthenticator.instance.platform.PlatformTag
-                    .ToLower()
-                    .Contains("steam");
         }
     }
 }
