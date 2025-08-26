@@ -32,7 +32,7 @@ namespace OculusReportMenu
         internal FieldInfo closeButton;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
-        internal bool ShowingMenu, ButtonsPressed, PlatformSteam;
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds;
 
         internal string OpenButton1, OpenButton2;
         internal float Sensitivity, blockButtonsUntilTimestamp;
@@ -41,9 +41,12 @@ namespace OculusReportMenu
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
             instance = this;
 
-            OpenButton1 = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            OpenButton2 = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            Sensitivity = Config.Bind("Input", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+            UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
+            OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            OpenButton2       = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            Sensitivity       = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+            
+            Manual = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
@@ -51,18 +54,23 @@ namespace OculusReportMenu
                 ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
                 ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
 
-                UpdatePosition =
-                    typeof(GorillaMetaReport).GetMethod("CheckDistance",
+                if (Manual) {
+                    UpdatePosition =
+                        typeof(GorillaMetaReport).GetMethod("CheckDistance",
                         BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    closeButton = typeof(GorillaMetaReport).GetField("closeButton",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+
                 OpenMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                closeButton = typeof(GorillaMetaReport).GetField("closeButton",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
+  
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
             });
         }
@@ -76,11 +84,14 @@ namespace OculusReportMenu
                 return;
 
             if (Menu != null) {
-                ButtonsPressed =
-                    (CheckButtonPressedStatus(OpenButton1) && CheckButtonPressedStatus(OpenButton2))
-                    | Keyboard.current.tabKey.wasPressedThisFrame;
+                ButtonsPressed = 
+                    (
+                        UseCustomKeybinds ? 
+                        (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
+                        (ControllerInputPoller.leftControllerSecondaryButton & ControllerInputPoller.rightControllerSecondaryButton)
+                    ) | Keyboard.current.tabKey.wasPressedThisFrame;
 
-                if (ShowingMenu) {
+                if (ShowingMenu & Manual) {
                     GTPlayer.Instance.disableMovement = false;
                     GTPlayer.Instance.inOverlay = false;
                     GTPlayer.Instance.InReportMenu = false;
@@ -110,7 +121,7 @@ namespace OculusReportMenu
             if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
                 ShowingMenu = false;
 
-            if (((GorillaReportButton)closeButton.GetValue(Menu)).selected)
+            if (((GorillaReportButton)closeButton.GetValue(Menu)).selected & Manual)
                 Teardown.Invoke(Menu, null);
         }
 
