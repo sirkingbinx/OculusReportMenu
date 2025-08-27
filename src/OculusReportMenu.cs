@@ -18,6 +18,7 @@ using Valve.VR;
 // GT
 using GorillaNetworking;
 using GorillaLocomotion;
+using Photon.Pun;
 
 namespace OculusReportMenu
 {
@@ -80,7 +81,7 @@ namespace OculusReportMenu
                 if (UseProperties) {
                     // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
                     ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
-                    properties.Add("kingbingus.oculusreportmenu", "2.2.0");
+                    properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
                     PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
                 }
             });
@@ -99,7 +100,7 @@ namespace OculusReportMenu
                     (
                         UseCustomKeybinds ? 
                         (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
-                        (ControllerInputPoller.leftControllerSecondaryButton & ControllerInputPoller.rightControllerSecondaryButton)
+                        (ControllerInputPoller.instance.leftControllerSecondaryButton & ControllerInputPoller.instance.rightControllerSecondaryButton)
                     ) | Keyboard.current.tabKey.wasPressedThisFrame;
 
                 if (ShowingMenu & Manual) {
