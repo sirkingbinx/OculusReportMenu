@@ -21,7 +21,7 @@ using GorillaLocomotion;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.1.1")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.0")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -72,6 +72,10 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+
+                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+                properties.Add("kingbingus.oculusreportmenu", "2.2.0");
+                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
             });
         }
 
