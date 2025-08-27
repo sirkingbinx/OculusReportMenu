@@ -32,7 +32,7 @@ namespace OculusReportMenu
         internal FieldInfo closeButton;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
-        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds;
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties;
 
         internal string OpenButton1, OpenButton2;
         internal float Sensitivity, blockButtonsUntilTimestamp;
@@ -41,10 +41,14 @@ namespace OculusReportMenu
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
             instance = this;
 
+            // Keybinds
             UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
             OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
             OpenButton2       = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
             Sensitivity       = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+
+            // Sharing
+            UseProperties      = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
             
             Manual = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
@@ -73,9 +77,12 @@ namespace OculusReportMenu
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
 
-                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
-                properties.Add("kingbingus.oculusreportmenu", "2.2.0");
-                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
+                if (UseProperties) {
+                    // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
+                    ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+                    properties.Add("kingbingus.oculusreportmenu", "2.2.0");
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
+                }
             });
         }
 
