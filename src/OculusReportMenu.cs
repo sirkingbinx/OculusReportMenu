@@ -42,6 +42,14 @@ namespace OculusReportMenu
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
             instance = this;
 
+            if (UseProperties)
+            {
+                // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
+                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+                properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
+                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
+            }
+
             // Keybinds
             UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
             OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
@@ -49,9 +57,10 @@ namespace OculusReportMenu
             Sensitivity       = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             // Sharing
-            UseProperties      = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
+            UseProperties     = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
             
-            Manual = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
+            // Core
+            Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
@@ -77,13 +86,6 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
-
-                if (UseProperties) {
-                    // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
-                    ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
-                    properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
-                }
             });
         }
 
