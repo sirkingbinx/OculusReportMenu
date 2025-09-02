@@ -22,7 +22,7 @@ using Photon.Pun;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.1")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
