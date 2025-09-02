@@ -42,14 +42,6 @@ namespace OculusReportMenu
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
             instance = this;
 
-            if (UseProperties)
-            {
-                // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
-                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
-                properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
-                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
-            }
-
             // Keybinds
             UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
             OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
@@ -62,6 +54,14 @@ namespace OculusReportMenu
             // Core
             Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
+            if (UseProperties)
+            {
+                // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
+                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+                properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
+                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
+            }
+            
             GorillaTagger.OnPlayerSpawned(delegate
             {
                 ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
