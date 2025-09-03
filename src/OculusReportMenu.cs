@@ -19,6 +19,7 @@ using Valve.VR;
 using GorillaNetworking;
 using GorillaLocomotion;
 using Photon.Pun;
+using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
@@ -55,12 +56,7 @@ namespace OculusReportMenu
             Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
             if (UseProperties)
-            {
-                // code famously borrowed from HanSolo1OOOFalcon/WhoIsThatMonke
-                ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
-                properties.Add("kingbingus.oculusreportmenu", Info.Metadata.Version);
-                PhotonNetwork.LocalPlayer.SetCustomProperties(properties);
-            }
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { {"kingbingus.oculusreportmenu", Info.Metadata.Version} });
             
             GorillaTagger.OnPlayerSpawned(delegate
             {
