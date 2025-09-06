@@ -18,8 +18,8 @@ using Valve.VR;
 // GT
 using GorillaNetworking;
 using GorillaLocomotion;
-using ExitGames.Client.Photon;
 using Photon.Pun;
+using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
@@ -54,17 +54,15 @@ namespace OculusReportMenu
             
             // Core
             Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
+
+            if (UseProperties)
+                PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { {"kingbingus.oculusreportmenu", Info.Metadata.Version} });
             
             GorillaTagger.OnPlayerSpawned(delegate
             {
                 ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
                 ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
                 ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-
-                /*
-                if (UseProperties)
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { {"kingbingus.oculusreportmenu", Info.Metadata.Version} });
-                */
 
                 if (Manual) {
                     UpdatePosition =
