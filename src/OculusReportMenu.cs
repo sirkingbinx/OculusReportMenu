@@ -34,7 +34,7 @@ namespace OculusReportMenu
         internal FieldInfo closeButton;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
-        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties;
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties, AllowTabOpen;
 
         internal string OpenButton1, OpenButton2;
         internal float Sensitivity, blockButtonsUntilTimestamp;
@@ -47,6 +47,7 @@ namespace OculusReportMenu
             UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
             OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
             OpenButton2       = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            AllowTabOpen      = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
             Sensitivity       = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             // Sharing
@@ -55,9 +56,6 @@ namespace OculusReportMenu
             // Core
             Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
 
-            if (UseProperties)
-                PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { {"kingbingus.oculusreportmenu", Info.Metadata.Version} });
-            
             GorillaTagger.OnPlayerSpawned(delegate
             {
                 ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
@@ -82,6 +80,14 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+
+                /*
+                 * currently breaks connecting to lobbies, will fix it whenever i feel like it
+                 * it's not really essential so i'll leave it like this
+                 
+                if (UseProperties)
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { { "kingbingus.oculusreportmenu", Info.Metadata.Version } });
+                */
             });
         }
 
@@ -95,11 +101,12 @@ namespace OculusReportMenu
 
             if (Menu != null) {
                 ButtonsPressed = 
-                    (
-                        UseCustomKeybinds ? 
+                    (UseCustomKeybinds ? 
                         (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
                         (ControllerInputPoller.instance.leftControllerSecondaryButton & ControllerInputPoller.instance.rightControllerSecondaryButton)
-                    ) | Keyboard.current.tabKey.wasPressedThisFrame;
+                    ) 
+                    | (AllowTabOpen & Keyboard.current.tabKey.wasPressedThisFrame
+                );
 
                 if (ShowingMenu & Manual) {
                     GTPlayer.Instance.disableMovement = false;
@@ -111,9 +118,12 @@ namespace OculusReportMenu
                     ORMRightHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.rightControllerTransform.position,
                         GTPlayer.Instance.rightControllerTransform.rotation);
+                    ORMRightHand.transform.Rotate(90, 0, 0);
+
                     ORMLeftHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.leftControllerTransform.position,
                         GTPlayer.Instance.leftControllerTransform.rotation);
+                    ORMLeftHand.transform.Rotate(90, 0, 0);
 
                     UpdatePosition.Invoke(Menu, null);
                     CheckReports.Invoke(Menu, null);
