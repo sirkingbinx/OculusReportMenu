@@ -118,12 +118,16 @@ namespace OculusReportMenu
                     ORMRightHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.rightControllerTransform.position,
                         GTPlayer.Instance.rightControllerTransform.rotation);
-                    ORMRightHand.transform.Rotate(90, 0, 0);
 
                     ORMLeftHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.leftControllerTransform.position,
                         GTPlayer.Instance.leftControllerTransform.rotation);
-                    ORMLeftHand.transform.Rotate(90, 0, 0);
+
+                    if (!PlatformSteam)
+                    {
+                        ORMLeftHand.transform.Rotate(90, 0, 0);
+                        ORMRightHand.transform.Rotate(90, 0, 0);
+                    }
 
                     UpdatePosition.Invoke(Menu, null);
                     CheckReports.Invoke(Menu, null);
