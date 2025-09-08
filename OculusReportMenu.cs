@@ -1,21 +1,16 @@
 // OculusReportMenu
-// (C) Copyright 2024 - 2025 bingus
+// (C) Copyright 2024 - 2025 SirKingBinx (Bingus)
 // MIT License
 
-// Patchers
 using BepInEx;
 using HarmonyLib;
-
-// System
 using System.Reflection;
 
-// Engine
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using Valve.VR;
 
-// GT
 using GorillaNetworking;
 using GorillaLocomotion;
 using Photon.Pun;
@@ -23,7 +18,7 @@ using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.1")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.3.0")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -34,7 +29,7 @@ namespace OculusReportMenu
         internal FieldInfo closeButton;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
-        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties, AllowTabOpen;
+        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties, AllowTabOpen, NoHandRotationRift;
 
         internal string OpenButton1, OpenButton2;
         internal float Sensitivity, blockButtonsUntilTimestamp;
@@ -44,17 +39,18 @@ namespace OculusReportMenu
             instance = this;
 
             // Keybinds
-            UseCustomKeybinds = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
-            OpenButton1       = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            OpenButton2       = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            AllowTabOpen      = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
-            Sensitivity       = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+            UseCustomKeybinds  = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
+            OpenButton1        = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            OpenButton2        = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            AllowTabOpen       = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
+            Sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             // Sharing
-            UseProperties     = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
+            UseProperties      = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
             
             // Core
-            Manual            = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
+            Manual             = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
+            NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value)
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
@@ -92,14 +88,14 @@ namespace OculusReportMenu
         }
 
         internal void Update() {
-            blockButtonsUntilTimestamp = (float)
-                typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
-                BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Menu);
-
-            if (blockButtonsUntilTimestamp > Time.time)
-                return;
-
             if (Menu != null) {
+                blockButtonsUntilTimestamp = (float)
+                    typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
+                    BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Menu);
+
+                if (blockButtonsUntilTimestamp > Time.time)
+                    return;
+
                 ButtonsPressed = 
                     (UseCustomKeybinds ? 
                         (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
@@ -123,7 +119,7 @@ namespace OculusReportMenu
                         GTPlayer.Instance.leftControllerTransform.position,
                         GTPlayer.Instance.leftControllerTransform.rotation);
 
-                    if (!PlatformSteam)
+                    if (!(PlatformSteam && NoHandRotationRift))
                     {
                         ORMLeftHand.transform.Rotate(90, 0, 0);
                         ORMRightHand.transform.Rotate(90, 0, 0);
@@ -136,15 +132,25 @@ namespace OculusReportMenu
                     Menu.gameObject.SetActive(true);
                     Menu.enabled = true;
 
-                    object[] stuff = { false };
-                    OpenMenu.Invoke(Menu, stuff);
+                    /*
+                     * since the AI moderation update:
+                     *
+                     * report menu takes "isSanction" as an argument,
+                     * which is actually just if it's a voice warning or not.
+                     *
+                     * set it to false to get the leaderboard.
+                    */
+                    object[] openArgs = { false };
+                    OpenMenu.Invoke(Menu, openArgs);
                     ShowingMenu = true;
                 }
             }
 
+            // close other stuff
             if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
                 ShowingMenu = false;
 
+            // close button
             if (((GorillaReportButton)closeButton.GetValue(Menu)).selected & Manual)
                 Teardown.Invoke(Menu, null);
         }

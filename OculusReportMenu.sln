@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34601.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OculusReportMenu", "src/OculusReportMenu.csproj", "{069A6669-2675-4B2B-8A6B-A156C343258E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OculusReportMenu", "OculusReportMenu.csproj", "{069A6669-2675-4B2B-8A6B-A156C343258E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
