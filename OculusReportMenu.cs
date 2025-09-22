@@ -18,7 +18,7 @@ using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.3.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.4.0")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -45,11 +45,8 @@ namespace OculusReportMenu
             AllowTabOpen       = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
             Sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
-            // Sharing
-            UseProperties      = Config.Bind("Sharing", "ShareModInformation", true, "Allow people using mod checkers to see you have OculusReportMenu installed").Value;
-            
             // Core
-            Manual             = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function.").Value;
+            Manual             = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function. Required for steam users").Value;
             NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value)
 
             GorillaTagger.OnPlayerSpawned(delegate
@@ -76,14 +73,6 @@ namespace OculusReportMenu
                     BindingFlags.NonPublic | BindingFlags.Instance);
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
-
-                /*
-                 * currently breaks connecting to lobbies, will fix it whenever i feel like it
-                 * it's not really essential so i'll leave it like this
-                 
-                if (UseProperties)
-                    PhotonNetwork.LocalPlayer.SetCustomProperties(new Hashtable() { { "kingbingus.oculusreportmenu", Info.Metadata.Version } });
-                */
             });
         }
 
