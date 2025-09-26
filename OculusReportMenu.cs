@@ -18,7 +18,7 @@ using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.1")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.3")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
