@@ -18,7 +18,7 @@ using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.4.0")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.1")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -47,7 +47,7 @@ namespace OculusReportMenu
 
             // Core
             Manual             = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function. Required for steam users").Value;
-            NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value)
+            NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
             {

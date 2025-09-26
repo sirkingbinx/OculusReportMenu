@@ -63,9 +63,6 @@
 		<Reference Include="Unity.XR.Management">
 		  <HintPath>$(GameAssemblyPath)\Unity.XR.Management.dll</HintPath>
 		</Reference>
-		<Reference Include="Unity.XR.Oculus">
-		  <HintPath>$(GameAssemblyPath)\Unity.XR.Oculus.dll</HintPath>
-		</Reference>
 		<Reference Include="UnityEngine">
 		  <HintPath>$(GameAssemblyPath)\UnityEngine.dll</HintPath>
 		</Reference>
