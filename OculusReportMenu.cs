@@ -18,7 +18,7 @@ using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.3")]
+    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.4")]
     internal class Plugin : BaseUnityPlugin
     {
         internal static Plugin instance;
@@ -26,7 +26,7 @@ namespace OculusReportMenu
         internal GorillaMetaReport Menu;
         internal GameObject ORMOccluder, ORMLeftHand, ORMRightHand;
 
-        internal FieldInfo closeButton;
+        internal FieldInfo closeButton, blockButtonsUntilTimestamp_Field;
         internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
 
         internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties, AllowTabOpen, NoHandRotationRift;
@@ -46,7 +46,6 @@ namespace OculusReportMenu
             Sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             // Core
-            Manual             = Config.Bind("Core", "ManualReportMenuControl", true, "Allow OculusReportMenu to manually control report menu position, rotation, and (some) function. Required for steam users").Value;
             NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
@@ -55,32 +54,37 @@ namespace OculusReportMenu
                 ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
                 ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
 
-                if (Manual) {
-                    UpdatePosition =
-                        typeof(GorillaMetaReport).GetMethod("CheckDistance",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    
-                    closeButton = typeof(GorillaMetaReport).GetField("closeButton",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
+                UpdatePosition =
+                    typeof(GorillaMetaReport).GetMethod("CheckDistance",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                
+                closeButton = typeof(GorillaMetaReport).GetField("closeButton",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                blockButtonsUntilTimestamp_Field = typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
 
-                    CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                }
+                CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
 
                 OpenMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay",
                     BindingFlags.NonPublic | BindingFlags.Instance);
   
                 PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+
+                /*
+                bingus note:
+                
+                This is where fixing the close button should go.
+                If my own research was right, re-add the button material and color and you should be good to go.
+                */
             });
         }
 
         internal void Update() {
             if (Menu != null) {
-                blockButtonsUntilTimestamp = (float)
-                    typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
-                    BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Menu);
+                blockButtonsUntilTimestamp = (float)blockButtonsUntilTimestamp_Field.GetValue(Menu);
 
                 if (blockButtonsUntilTimestamp > Time.time)
                     return;
@@ -89,11 +93,9 @@ namespace OculusReportMenu
                     (UseCustomKeybinds ? 
                         (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
                         (ControllerInputPoller.instance.leftControllerSecondaryButton & ControllerInputPoller.instance.rightControllerSecondaryButton)
-                    ) 
-                    | (AllowTabOpen & Keyboard.current.tabKey.wasPressedThisFrame
-                );
+                    ) | (AllowTabOpen & Keyboard.current.tabKey.wasPressedThisFrame);
 
-                if (ShowingMenu & Manual) {
+                if (ShowingMenu) {
                     GTPlayer.Instance.disableMovement = false;
                     GTPlayer.Instance.inOverlay = false;
                     GTPlayer.Instance.InReportMenu = false;
@@ -140,7 +142,7 @@ namespace OculusReportMenu
                 ShowingMenu = false;
 
             // close button
-            if (((GorillaReportButton)closeButton.GetValue(Menu)).selected & Manual)
+            if (((GorillaReportButton)closeButton.GetValue(Menu)).selected)
                 Teardown.Invoke(Menu, null);
         }
 
