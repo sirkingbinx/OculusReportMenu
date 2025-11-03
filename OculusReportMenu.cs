@@ -61,7 +61,7 @@ namespace OculusReportMenu
                 closeButton = typeof(GorillaMetaReport).GetField("closeButton",
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 blockButtonsUntilTimestamp_Field = typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
-                    BindingFlags.NonPublic | BindingFlags.Instance)
+                    BindingFlags.NonPublic | BindingFlags.Instance);
 
                 CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
                     BindingFlags.NonPublic | BindingFlags.Instance);
@@ -103,12 +103,12 @@ namespace OculusReportMenu
                     ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
                     ORMRightHand.transform.SetPositionAndRotation(
-                        GTPlayer.Instance.rightControllerTransform.position,
-                        GTPlayer.Instance.rightControllerTransform.rotation);
+                        GTPlayer.Instance.RightHand.controllerTransform.position,
+                        GTPlayer.Instance.RightHand.controllerTransform.rotation);
 
                     ORMLeftHand.transform.SetPositionAndRotation(
-                        GTPlayer.Instance.leftControllerTransform.position,
-                        GTPlayer.Instance.leftControllerTransform.rotation);
+                        GTPlayer.Instance.LeftHand.controllerTransform.position,
+                        GTPlayer.Instance.LeftHand.controllerTransform.rotation);
 
                     if (!(PlatformSteam && NoHandRotationRift))
                     {
