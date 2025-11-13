@@ -1,4 +1,4 @@
-# OculusReportMenu ![all](https://img.shields.io/github/downloads/sirkingbinx/OculusReportMenu/total)
+# OculusReportMenu ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/sirkingbinx/OculusReportMenu/OculusReportMenu.dll)
 Access the OculusReportMenu (a portable leaderboard) on SteamVR and Oculus Rift headsets by pressing the right thumbstick in and pressing the left secondary. ([Change Keybinds](#config))
 
 ## Installation
