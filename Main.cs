@@ -30,7 +30,7 @@ namespace OculusReportMenu
                 if (!__menuInit)
                     __menuInit == (_menu != null);
                 
-                return __menuInit
+                return __menuInit;
             };
             
             set => __menuInit = value; // just in case
@@ -42,20 +42,31 @@ namespace OculusReportMenu
         internal void Start() {
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
 
-            // Keybinds
-            Input.UseCustomKeybinds  = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
-            Input.AllowTabOpening       = Config.Bind("Keybinds", "AllowTabOpen", false, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
-            Input.OpenButton1        = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            Input.OpenButton2        = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            Input.Sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+            Input.UseCustomKeybinds = Config.Bind("Keybinds",
+                "UseCustomKeybinds", true,
+                "Use your custom keybind settings (when off, press left + right secondaries)"
+            ).Value;
+
+            Input.AllowTabOpening = Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
+
+            Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", "LS",
+                "One of the buttons you use to open ORM (NAN for none)").Value;
+            Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", "RS",
+                "One of the buttons you use to open ORM (NAN for none)").Value;
+            Input.Sensitivity = Config.Bind("Keybinds", "Sensitivity", 0.5f,
+                "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
-                _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
-                _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
-                _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-                
-                _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+                try {
+                    _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
+                    _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
+                    _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+                    
+                    _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+                } catch (var ex) {
+                    Debug.Log($"Failed to load OculusReportMenu: ${ex}");
+                }
             });
         }
 
@@ -82,26 +93,24 @@ namespace OculusReportMenu
 
                     if (!_platformSteam)
                     {
-                        // make the hands turn right on rift PCVR
                         _leftHand.transform.Rotate(90, 0, 0);
                         _rightHand.transform.Rotate(90, 0, 0);
                     }
 
                     _menu.CheckDistance();
                     _menu.CheckReportSubmit();
-                } else if (Input.Activated && !_menu.gameObject.activeInHierarchy)
+                } else if (Input.Activated && !_showingMenu)
                 {
                     _menu.gameObject.SetActive(true);
                     _menu.enabled = true;
 
                     _menu.StartOverlay();
-                    _showingMenu = true;
                 }
             }
 
-            _showingMenu = _menu.gameObject.activeInHierarchy && _showingMenu;
-            
-            if (_menu.closeButton.selected || _menu.closeButton.testPress)
+            _showingMenu = _menu.gameObject.activeInHierarchy;
+
+            if ((_menu.closeButton.selected || _menu.closeButton.testPress) && _showingMenu)
                 _menu.Teardown();
         }
     }

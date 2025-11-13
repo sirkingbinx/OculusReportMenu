@@ -1,3 +1,7 @@
+// OculusReportMenu
+// (C) Copyright 2024 - 2026 SirKingBinx (Bingus)
+// MIT License
+
 using GorillaLocomotion;
 using HarmonyLib;
 
