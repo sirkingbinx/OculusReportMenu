@@ -4,7 +4,6 @@
 
 using BepInEx;
 using HarmonyLib;
-using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,140 +12,93 @@ using Valve.VR;
 
 using GorillaNetworking;
 using GorillaLocomotion;
-using Photon.Pun;
-using ExitGames.Client.Photon;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("kingbingus.oculusreportmenu", "OculusReportMenu", "2.2.4")]
+    [BepInPlugin("bingus.oculusreportmenu", "OculusReportMenu", "2.2.5")]
     internal class Plugin : BaseUnityPlugin
     {
-        internal static Plugin instance;
-
-        internal GorillaMetaReport Menu;
-        internal GameObject ORMOccluder, ORMLeftHand, ORMRightHand;
-
-        internal FieldInfo closeButton, blockButtonsUntilTimestamp_Field;
-        internal MethodInfo UpdatePosition, CheckReports, OpenMenu, Teardown;
-
-        internal bool ShowingMenu, ButtonsPressed, PlatformSteam, Manual, UseCustomKeybinds, UseProperties, AllowTabOpen, NoHandRotationRift;
-
-        internal string OpenButton1, OpenButton2;
-        internal float Sensitivity, blockButtonsUntilTimestamp;
+        private static GorillaMetaReport _menu;
+        private static bool _menuInit;
+        
+        private GameObject _occluder, _leftHand, _rightHand;
+        private bool _showingMenu, _buttonsPressed, _platformSteam, _useCustomKeybinds, _allowTabOpen;
+        private string _openButton1, _openButton2;
+        private float _sensitivity;
 
         internal void Start() {
             Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
-            instance = this;
 
             // Keybinds
-            UseCustomKeybinds  = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
-            OpenButton1        = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            OpenButton2        = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
-            AllowTabOpen       = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
-            Sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
-
-            // Core
-            NoHandRotationRift = Config.Bind("Core", "NoHandRotationRift", false, "Fixes hand rotation on Rift PCVR").Value;
+            _useCustomKeybinds  = Config.Bind("Keybinds", "UseCustomKeybinds", true, "Use your custom keybind settings (when off, press left + right secondaries)").Value;
+            _openButton1        = Config.Bind("Keybinds", "OpenButton1", "LS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            _openButton2        = Config.Bind("Keybinds", "OpenButton2", "RS", "One of the buttons you use to open ORM (NAN for none)").Value;
+            _allowTabOpen       = Config.Bind("Keybinds", "AllowTabOpen", true, "Allows you to press TAB to open the report menu (mostly used for testing)").Value;
+            _sensitivity        = Config.Bind("Keybinds", "Sensitivity", 0.5f, "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 
             GorillaTagger.OnPlayerSpawned(delegate
             {
-                ORMOccluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
-                ORMLeftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
-                ORMRightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-
-                UpdatePosition =
-                    typeof(GorillaMetaReport).GetMethod("CheckDistance",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
+                _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
+                _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
+                _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
                 
-                closeButton = typeof(GorillaMetaReport).GetField("closeButton",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                blockButtonsUntilTimestamp_Field = typeof(GorillaMetaReport).GetField("blockButtonsUntilTimestamp",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                CheckReports = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                Teardown = typeof(GorillaMetaReport).GetMethod("CheckReportSubmit",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                OpenMenu = typeof(GorillaMetaReport).GetMethod("StartOverlay",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-  
-                PlatformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
-
-                /*
-                bingus note:
-                
-                This is where fixing the close button should go.
-                If my own research was right, re-add the button material and color and you should be good to go.
-                */
+                _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
             });
         }
 
         internal void Update() {
-            if (Menu != null) {
-                blockButtonsUntilTimestamp = (float)blockButtonsUntilTimestamp_Field.GetValue(Menu);
-
-                if (blockButtonsUntilTimestamp > Time.time)
+            if (_menuInit)
+            {
+                if (_menu.blockButtonsUntilTimestamp > Time.time)
                     return;
 
-                ButtonsPressed = 
-                    (UseCustomKeybinds ? 
-                        (CheckButtonPressedStatus(OpenButton1) & CheckButtonPressedStatus(OpenButton2)) :
+                _buttonsPressed = 
+                    (_useCustomKeybinds ? 
+                        (CheckButtonPressedStatus(_openButton1) & CheckButtonPressedStatus(_openButton2)) :
                         (ControllerInputPoller.instance.leftControllerSecondaryButton & ControllerInputPoller.instance.rightControllerSecondaryButton)
-                    ) | (AllowTabOpen & Keyboard.current.tabKey.wasPressedThisFrame);
+                    ) | (_allowTabOpen & Keyboard.current.tabKey.wasPressedThisFrame);
 
-                if (ShowingMenu) {
+                if (_showingMenu) {
                     GTPlayer.Instance.disableMovement = false;
                     GTPlayer.Instance.inOverlay = false;
                     GTPlayer.Instance.InReportMenu = false;
+                    
+                    _occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
-                    ORMOccluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
-
-                    ORMRightHand.transform.SetPositionAndRotation(
+                    _rightHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.RightHand.controllerTransform.position,
                         GTPlayer.Instance.RightHand.controllerTransform.rotation);
 
-                    ORMLeftHand.transform.SetPositionAndRotation(
+                    _leftHand.transform.SetPositionAndRotation(
                         GTPlayer.Instance.LeftHand.controllerTransform.position,
                         GTPlayer.Instance.LeftHand.controllerTransform.rotation);
 
-                    if (!(PlatformSteam && NoHandRotationRift))
+                    if (!_platformSteam)
                     {
-                        ORMLeftHand.transform.Rotate(90, 0, 0);
-                        ORMRightHand.transform.Rotate(90, 0, 0);
+                        // make the hands turn right on rift PCVR
+                        _leftHand.transform.Rotate(90, 0, 0);
+                        _rightHand.transform.Rotate(90, 0, 0);
                     }
 
-                    UpdatePosition.Invoke(Menu, null);
-                    CheckReports.Invoke(Menu, null);
-                } else if (ButtonsPressed)
+                    _menu.CheckDistance();
+                    _menu.CheckReportSubmit();
+                } else if (_buttonsPressed && !_menu.gameObject.activeInHierarchy)
                 {
-                    Menu.gameObject.SetActive(true);
-                    Menu.enabled = true;
+                    _menu.gameObject.SetActive(true);
+                    _menu.enabled = true;
 
-                    /*
-                     * since the AI moderation update:
-                     *
-                     * report menu takes "isSanction" as an argument,
-                     * which is actually just if it's a voice warning or not.
-                     *
-                     * set it to false to get the leaderboard.
-                    */
-                    object[] openArgs = { false };
-                    OpenMenu.Invoke(Menu, openArgs);
-                    ShowingMenu = true;
+                    _menu.StartOverlay();
+                    _showingMenu = true;
                 }
             }
 
-            // close other stuff
-            if (!Menu.gameObject.activeInHierarchy && ShowingMenu)
-                ShowingMenu = false;
-
-            // close button
-            if (((GorillaReportButton)closeButton.GetValue(Menu)).selected)
-                Teardown.Invoke(Menu, null);
+            _showingMenu = _menu.gameObject.activeInHierarchy && _showingMenu;
+            
+            if (_menu.closeButton.selected || _menu.closeButton.testPress)
+                _menu.Teardown();
         }
 
-        internal bool CheckButtonPressedStatus(string thisEntry)
+        private bool CheckButtonPressedStatus(string thisEntry)
         {
             bool temporarySClick;
 
@@ -154,10 +106,10 @@ namespace OculusReportMenu
             {
                 case "LP": return ControllerInputPoller.instance.leftControllerPrimaryButton;
                 case "LS": return ControllerInputPoller.instance.leftControllerSecondaryButton;
-                case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
-                case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
+                case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > _sensitivity;
+                case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > _sensitivity;
                 case "LJ":
-                    if (PlatformSteam)
+                    if (_platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -167,10 +119,10 @@ namespace OculusReportMenu
                 // right hand
                 case "RP": return ControllerInputPoller.instance.rightControllerPrimaryButton;
                 case "RS": return ControllerInputPoller.instance.rightControllerSecondaryButton;
-                case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
-                case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
+                case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > _sensitivity;
+                case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > _sensitivity;
                 case "RJ":
-                    if (PlatformSteam)
+                    if (_platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -184,8 +136,7 @@ namespace OculusReportMenu
             
             return false;
         }
-
-        // GorillaMetaReport
+        
         [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
         internal class OnOculusUpdate
         {
@@ -195,20 +146,11 @@ namespace OculusReportMenu
         [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
         internal class OnReportInit
         {
-            static void Postfix(GorillaMetaReport __instance) => instance.Menu = __instance;
-        }
-
-        [HarmonyPatch(typeof(GorillaMetaReport), "Update")]
-        internal class StopUpdate
-        {
-            static void Prefix() { return; }
-        }
-
-        [HarmonyPatch(typeof(GorillaMetaReport), "StartOverlay")]
-        internal class LetGGWPCook
-        {
-            // This is necessary because the GGWP moderation uses the report menu to show stuff. This should make sure we don't make your game break; don't change it plz
-            static void Postfix() => instance.ShowingMenu = true;
+            static void Postfix(GorillaMetaReport __instance)
+            {
+                _menu = __instance;
+                _menuInit = true;
+            }
         }
     }
 }

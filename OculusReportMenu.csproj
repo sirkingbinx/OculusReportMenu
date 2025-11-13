@@ -12,10 +12,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
+		
 		<Reference Include="0Harmony">
 		  <HintPath>$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
 		</Reference>
-		<Reference Include="Assembly-CSharp">
+		<Reference Include="Assembly-CSharp" Publicize="true">
 		  <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
 		</Reference>
 		<Reference Include="BepInEx">
