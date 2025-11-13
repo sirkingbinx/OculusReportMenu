@@ -3,7 +3,7 @@ name: Bug Report
 about: Create a bug report
 title: 'bug: '
 labels: bug, nofix
-assignees: bingus-dev
+assignees: sirkingbinx
 
 ---
 
@@ -12,6 +12,4 @@ assignees: bingus-dev
 
 ## Information
 - Platform (Steam/Rift):
-- Gorilla Tag Build Version: <!-- Computer / SUPPORT tab -->
-- OculusReportMenu Version:
-- Other mods installed:
+- Other mods installed: <!-- either a screenshot or a list you type out yourself, doesn't matter -->

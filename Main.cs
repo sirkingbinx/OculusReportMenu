@@ -22,8 +22,6 @@ namespace OculusReportMenu
     {
         private static GorillaMetaReport _menu;
 
-        // Rider complained that checking if null was expensive, so here's a slightly more complicated
-        // (but performant) solution
         private static bool __menuInit = false;
         private static bool _menuInit {
             get {

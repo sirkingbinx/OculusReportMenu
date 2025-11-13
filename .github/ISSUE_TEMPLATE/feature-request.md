@@ -3,8 +3,7 @@ name: Feature Request
 about: For features and stuff that isn't game-breaking
 title: 'feature: '
 labels: feature, global
-assignees: bingus-dev
-
+assignees: sirkingbinx
 ---
 
 # Description (what's your idea?)
