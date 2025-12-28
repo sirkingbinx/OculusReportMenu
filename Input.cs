@@ -27,8 +27,8 @@ namespace OculusReportMenu {
                 ;
                 
                 bool custom = UseCustomKeybinds
-                    && CheckButtonPressedStatus(_openButton1)
-                    && CheckButtonPressedStatus(_openButton2)
+                    && CheckButtonPressedStatus(OpenButton1)
+                    && CheckButtonPressedStatus(OpenButton2)
                 ;
                 
                 bool tab = EnableTabOpening
@@ -50,7 +50,7 @@ namespace OculusReportMenu {
                 case "LT": return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
                 case "LG": return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
                 case "LJ":
-                    if (_platformSteam)
+                    if (Plugin.Instance._platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -63,7 +63,7 @@ namespace OculusReportMenu {
                 case "RT": return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
                 case "RG": return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
                 case "RJ":
-                    if (Plugin._platformSteam)
+                    if (Plugin.Instance._platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
