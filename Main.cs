@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("bingus.oculusreportmenu", "OculusReportMenu", "2.2.5")]
+    [BepInPlugin("bingus.oculusreportmenu", "OculusReportMenu", "2.3.0")]
     internal class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance;
