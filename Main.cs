@@ -8,6 +8,8 @@ using GorillaNetworking;
 using HarmonyLib;
 using System;
 using UnityEngine;
+using UnityEngine.XR;
+using Valve.VR;
 
 namespace OculusReportMenu
 {
@@ -72,14 +74,13 @@ namespace OculusReportMenu
         internal void Update() {
             if (_menuInit)
             {
-                GTPlayer.Instance.inOverlay = _showingMenu;
-
                 if (_menu.blockButtonsUntilTimestamp > Time.time)
                     return;
 
                 if (_showingMenu) {
                     GTPlayer.Instance.InReportMenu = false;
-                    
+                    GTPlayer.Instance.inOverlay = true;
+
                     _occluder.transform.position = GorillaTagger.Instance.mainCamera.transform.position;
 
                     _rightHand.transform.SetPositionAndRotation(
