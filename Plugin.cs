@@ -18,7 +18,7 @@ namespace OculusReportMenu
     }
 #elif BEPINEX
     [BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
-    public class BepPlugin : BepInPlugin
+    public class BepPlugin : BaseUnityPlugin
     {
         public override void Awake() =>
             new GameObject(Constants.Name).AddComponent<Main>();
