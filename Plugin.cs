@@ -1,8 +1,9 @@
+using OculusReportMenu;
 using UnityEngine;
 
 #if MELONLOADER
 using MelonLoader;
-[assembly: MelonInfo(typeof(MLPlugin), Constants.Name, Constants.Version, Constants.Author)]
+[assembly: MelonInfo(typeof(MelonLoaderPlugin), OculusReportMenu.Constants.Name, OculusReportMenu.Constants.Version, OculusReportMenu.Constants.Author)]
 [assembly: MelonGame("Another Axiom", "Gorilla Tag")]
 #elif BEPINEX
 using BepInEx;
@@ -11,17 +12,22 @@ using BepInEx;
 namespace OculusReportMenu
 {
 #if MELONLOADER
-    public class MLPlugin : MelonMod
+    public class MelonLoaderPlugin : MelonMod
     {
-        public override void OnMelonInitialize() =>
+        public override void OnSceneWasLoaded(int buildindex, string sceneName) =>
             new GameObject(Constants.Name).AddComponent<Main>();
     }
 #elif BEPINEX
     [BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
     public class BepPlugin : BaseUnityPlugin
     {
-        public override void Awake() =>
+        public static BepPlugin Instance;
+
+        public void Awake()
+        {
+            Instance = this;
             new GameObject(Constants.Name).AddComponent<Main>();
+        }
     }
 #endif
 }

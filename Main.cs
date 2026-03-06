@@ -4,11 +4,15 @@
 
 using GorillaLocomotion;
 using GorillaNetworking;
-using HarmonyLib;
 using System;
+
+#if MELONLOADER
+using System.IO;
+using MelonLoader;
+#endif
+
+
 using UnityEngine;
-using UnityEngine.XR;
-using Valve.VR;
 
 namespace OculusReportMenu
 {
@@ -37,22 +41,39 @@ namespace OculusReportMenu
 
         internal void Start() {
             Instance = this;
-            Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
+            HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
-            Input.UseCustomKeybinds = Config.Bind("Keybinds",
+#if MELONLOADER
+            var configCategory = MelonPreferences.CreateCategory("Keybinds");
+            configCategory.SetFilePath($"UserData{Path.DirectorySeparatorChar}OculusReportMenu.cfg", true);
+
+            Input.OpenButton1 = configCategory.CreateEntry("OpenButton1", ORM_Button.LeftSecondary,
+                description: "Button you use to open the report menu").Value;
+            Input.OpenButton2 = configCategory.CreateEntry("OpenButton2", ORM_Button.RightSecondary,
+                description: "Button you use to open the report menu").Value;
+
+            Input.Sensitivity = configCategory.CreateEntry("Sensitivity", 0.5f,
+                description: "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
+
+            Input.EnableTabOpening =
+                configCategory.CreateEntry("AllowTabOpen", false, description: "Press TAB to open the report menu").Value;
+
+            configCategory.SaveToFile();
+#elif BEPINEX
+            Input.UseCustomKeybinds = BepPlugin.Instance.Config.Bind("Keybinds",
                 "UseCustomKeybinds", true,
                 "Use your custom keybind settings (when off, press left + right secondaries)"
             ).Value;
 
-            Input.EnableTabOpening = Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
+            Input.EnableTabOpening = BepPlugin.Instance.Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
 
-            Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
-                "One of the buttons you use to open ORM (NAN for none)").Value;
-            Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
-                "One of the buttons you use to open ORM (NAN for none)").Value;
-            Input.Sensitivity = Config.Bind("Keybinds", "Sensitivity", 0.5f,
+            Input.OpenButton1 = BepPlugin.Instance.Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
+                "Button you use to open the report menu").Value;
+            Input.OpenButton2 = BepPlugin.Instance.Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
+                "Button you use to open the report menu").Value;
+            Input.Sensitivity = BepPlugin.Instance.Config.Bind("Keybinds", "Sensitivity", 0.5f,
                 "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
-
+#endif
             GorillaTagger.OnPlayerSpawned(delegate
             {
                 try {

@@ -2,7 +2,7 @@
 <Project>
     <PropertyGroup>
         <!-- Set this to either "MELONLOADER" or "BEPINEX" exactly. -->
-        <Loader>MELONLOADER</Loader>
+        <Loader>BEPINEX</Loader>
         <!-- Path to your Gorilla Tag install dir -->
         <GamePath>C:\Program Files\Meta Horizon\Software\Software\another-axiom-gorilla-tag</GamePath>
     </PropertyGroup>
@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Loader)' == 'BEPINEX'">
-        <BepInExAssemblyPath>$(GamePath)\BepInEx\core</BepInExAssemblyPath>
+        <BepInExAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\BepInEx\core</BepInExAssemblyPath>
         <PluginsPath>$(GamePath)\BepInEx\plugins\BingusNametagsPlusPlus</PluginsPath>
     </PropertyGroup>
 

@@ -14,8 +14,8 @@ namespace OculusReportMenu {
 
         internal static float Sensitivity = 0.5f; 
 
-        internal static ORM_Button OpenButton1 = "LS";
-        internal static ORM_Button OpenButton2 = "RS";
+        internal static ORM_Button OpenButton1 = ORM_Button.LeftPrimary;
+        internal static ORM_Button OpenButton2 = ORM_Button.LeftSecondary;
 
         internal static bool EnableTabOpening, UseCustomKeybinds;
 
@@ -50,7 +50,7 @@ namespace OculusReportMenu {
                 case ORM_Button.LeftTrigger: return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
                 case ORM_Button.LeftGrip: return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
                 case ORM_Button.LeftJoystickClick:
-                    if (Plugin.Instance._platformSteam)
+                    if (Main.Instance._platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
@@ -63,7 +63,7 @@ namespace OculusReportMenu {
                 case ORM_Button.RightTrigger: return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
                 case ORM_Button.RightGrip: return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
                 case ORM_Button.RightJoystickClick:
-                    if (Plugin.Instance._platformSteam)
+                    if (Main.Instance._platformSteam)
                         temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
                     else
                         InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
