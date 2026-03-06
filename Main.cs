@@ -2,7 +2,6 @@
 // (C) Copyright 2024 - 2026 SirKingBinx (Bingus)
 // MIT License
 
-using BepInEx;
 using GorillaLocomotion;
 using GorillaNetworking;
 using HarmonyLib;
@@ -11,10 +10,9 @@ using UnityEngine;
 
 namespace OculusReportMenu
 {
-    [BepInPlugin("bingus.oculusreportmenu", "OculusReportMenu", "2.3.0")]
-    internal class Plugin : BaseUnityPlugin
+    internal class Main : MonoBehaviour
     {
-        public static Plugin Instance;
+        public static Main Instance;
 
         public static GorillaMetaReport _menu;
 
@@ -37,7 +35,7 @@ namespace OculusReportMenu
 
         internal void Start() {
             Instance = this;
-            Harmony.CreateAndPatchAll(GetType().Assembly, Info.Metadata.GUID);
+            Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
             Input.UseCustomKeybinds = Config.Bind("Keybinds",
                 "UseCustomKeybinds", true,
@@ -46,9 +44,9 @@ namespace OculusReportMenu
 
             Input.EnableTabOpening = Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
 
-            Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", "LS",
+            Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
                 "One of the buttons you use to open ORM (NAN for none)").Value;
-            Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", "RS",
+            Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
                 "One of the buttons you use to open ORM (NAN for none)").Value;
             Input.Sensitivity = Config.Bind("Keybinds", "Sensitivity", 0.5f,
                 "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;

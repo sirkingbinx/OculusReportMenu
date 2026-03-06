@@ -16,7 +16,7 @@ namespace OculusReportMenu {
         [HarmonyPatch(typeof(GorillaMetaReport), "Start")]
         internal class OnReportInit
         {
-            static void Postfix(GorillaMetaReport __instance) => Plugin._menu = __instance;
+            static void Postfix(GorillaMetaReport __instance) => Main._menu = __instance;
         }
     }
 }
