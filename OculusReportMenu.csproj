@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<LangVersion>8.0</LangVersion>
+		<LangVersion>14.0</LangVersion>
 		<PlatformTarget Condition="'$(Loader)' == 'MELONLOADER'">x64</PlatformTarget>
 	</PropertyGroup>
 
@@ -14,9 +14,11 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
 		
-		<Reference Include="0Harmony">
-		  <HintPath Condition="'$(Loader)' == 'BEPINEX'">$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
-		  <HintPath Condition="'$(Loader)' == 'MELONLOADER'">$(MelonLoaderAssemblyPath)\0Harmony.dll</HintPath>
+		<Reference Include="0Harmony" Condition="'$(Loader)' == 'BEPINEX'">
+		  <HintPath>$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="0Harmony" Condition="'$(Loader)' == 'MELONLOADER'">
+		  <HintPath>$(MelonLoaderAssemblyPath)\0Harmony.dll</HintPath>
 		</Reference>
 		<Reference Include="Assembly-CSharp" Publicize="true">
 		  <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
