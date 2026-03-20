@@ -41,7 +41,12 @@ namespace OculusReportMenu {
 
         private static bool CheckButtonPressedStatus(ORM_Button thisEntry)
         {
-            bool temporarySClick;
+            var resNormal = thisEntry switch
+            {
+                ORM_Button.LeftPrimary => ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand),
+                ORM_Button.LeftSecondary => ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand),
+                ORM_Button.LeftTrigger => ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity,
+                ORM_Button.LeftGrip => ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity,
 
             switch (thisEntry)
             {

@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Loader)' == 'BEPINEX'">
-        <BepInExAssemblyPath>C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\BepInEx\core</BepInExAssemblyPath>
+        <BepInExAssemblyPath>$(GamePath)\BepInEx\core</BepInExAssemblyPath>
         <PluginsPath>$(GamePath)\BepInEx\plugins\OculusReportMenu</PluginsPath>
     </PropertyGroup>
 
