@@ -1,38 +1,8 @@
 # OculusReportMenu ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/sirkingbinx/OculusReportMenu/OculusReportMenu.dll)
-Access the OculusReportMenu (a portable leaderboard) on SteamVR and Oculus Rift headsets by pressing the right thumbstick in and pressing the left secondary. ([Change Keybinds](#config))
+OculusReportMenu is a mod for Gorilla Tag that give you access to the MetaReportMenu (a portable leaderboard for reporting players) on SteamVR and Oculus Rift / Quest Link headsets. Press both secondaries (top buttons on your controllers) to open / close it.
 
 ## Installation
-### From MonkeModManager
-You can install this mod with [MonkeModManager](https://github.com/the-graze/monkemodmanager), look for "OculusReportMenu" under "Tweaks / Tools" <br>
-<img width="394" height="63" alt="image" src="https://github.com/user-attachments/assets/bccd8b70-8ef9-4ced-8cab-404a81b183f6" />
-
 ### From Releases
 Look for the latest release, and download ``OculusReportMenu.dll``. Drag this into your plugins folder.
 
-## Config
-
-| *                        | Left Controller   | Right Controller |
-| ---------------------| ----------------------- | ------------------------|
-| Primary            |LP                          |RP                          |
-| Secondary        |LS                          |RS                          |
-| Grip                   |LG                         |RG                          |
-| Trigger               |LT                         |RT                          |
-| Thumbstick In |LJ                            |RJ                          |
-| None | NAN | NAN |
-
-Here is the default configuration:
-```
-openButton1 = RJ # right thumbstick in
-openButton2 = LS # left secondary in
-```
-
-If you want to bind opening the menu to one button:
-```
-openButton1 = LP
-openButton2 = NAN
-```
-
-You can also adjust the sensitivity for when it detects triggers and grips.
-```
-Sensitivity = 0.5
-```
+###### This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.
