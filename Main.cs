@@ -4,8 +4,6 @@
 using GorillaLocomotion;
 using GorillaNetworking;
 using System;
-using BepInEx;
-using BepInEx.Logging;
 
 #if MELONLOADER
 /*
@@ -14,6 +12,8 @@ using BepInEx.Logging;
  */
 using System.IO;
 using MelonLoader;
+#elif BEPINEX
+using BepInEx;
 #endif
 
 using UnityEngine;
@@ -26,8 +26,7 @@ namespace OculusReportMenu;
  * loading config, and much more.
  */
 
-[BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
-internal class Main : BaseUnityPlugin
+internal class Main
 {
 #nullable enable
     public static Main? Instance;
@@ -63,6 +62,7 @@ internal class Main : BaseUnityPlugin
 
     internal void Start() {
         Instance = this;
+        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
 #if MELONLOADER
         /*
@@ -88,15 +88,14 @@ internal class Main : BaseUnityPlugin
         /*
          * Same thing as above, but for BepInEx.
          */
-        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
-        Input.EnableTabOpening = Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
+        Input.EnableTabOpening = Plugin.Instance.Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
 
-        Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
+        Input.OpenButton1 = Plugin.Instance.Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
             "Button you use to open the report menu").Value;
-        Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
+        Input.OpenButton2 = Plugin.Instance.Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
             "Button you use to open the report menu").Value;
-        Input.Sensitivity = Config.Bind("Keybinds", "Sensitivity", 0.5f,
+        Input.Sensitivity = Plugin.Instance.Config.Bind("Keybinds", "Sensitivity", 0.5f,
             "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 #endif
 
@@ -168,8 +167,6 @@ internal class Main : BaseUnityPlugin
 
             Menu.CheckDistance();
             Menu.CheckReportSubmit();
-
-            Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is enabled");
         } else if (!inputActivatedBefore && Input.Activated)
         {
             /*
@@ -181,8 +178,6 @@ internal class Main : BaseUnityPlugin
             Menu.enabled = true;
 
             Menu.StartOverlay();
-
-            Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is being enabled");
         }
 
         // This `if` block resets "inputActivatedBefore" so you can press the buttons again.
@@ -193,8 +188,6 @@ internal class Main : BaseUnityPlugin
         if (!inputActivatedBefore && Input.Activated)
             goto teardown;
 
-        Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is idle");
-
         return; // Stop us from reaching the "teardown" block if we don't want to close the menu yet
 
         /*
@@ -203,7 +196,6 @@ internal class Main : BaseUnityPlugin
         * This will let you move again and close the menu so your game returns.
         */
     teardown:
-        Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is being torn down");
         Menu.Teardown();
         Menu.ToggleLevelVisibility(true);
         GTPlayer.Instance.InReportMenu = false;

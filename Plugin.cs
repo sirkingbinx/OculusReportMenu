@@ -14,8 +14,9 @@ using UnityEngine;
 // Stuff for MelonLoader
 using OculusReportMenu;
 using MelonLoader;
-[assembly: MelonInfo(typeof(MelonLoaderPlugin), OculusReportMenu.Constants.Name, OculusReportMenu.Constants.Version, OculusReportMenu.Constants.Author)]
+[assembly: MelonInfo(typeof(Plugin), OculusReportMenu.Constants.Name, OculusReportMenu.Constants.Version, OculusReportMenu.Constants.Author)]
 [assembly: MelonGame("Another Axiom", "Gorilla Tag")]
+[assembly: HarmonyDontPatchAll]
 #elif BEPINEX
 // Stuff for BepInEx (a lot less compared to ML)
 using BepInEx;
@@ -30,13 +31,14 @@ public class Plugin : MelonMod
     * MelonLoader doesn't have a great "start" call that we can hook onto.
     * Instead, we wait for the first scene to load before adding OculusReportMenu to it.
     */
-    public override void OnSceneWasLoaded(int buildindex, string sceneName) {
-        Main.Instance ??= new GameObject(Constants.Name).AddComponent<Main>();
+    public override void OnLateInitializeMelon() {
+        Main.Instance ??= new Main();
+        Main.Instance.Start();
     }
+
+    public override void OnUpdate() => Main.Instance?.Update();
 }
 #elif BEPINEX
-
-/*
 
 [BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
 public class Plugin : BaseUnityPlugin
@@ -47,10 +49,11 @@ public class Plugin : BaseUnityPlugin
     public void Awake()
     {
         Instance = this;
-        new GameObject(Constants.Name).AddComponent<Main>();
+        Main.Instance = new Main();
     }
-}
 
-*/
+    public void Start() => Main.Instance.Start();
+    public void Update() => Main.Instance.Update();
+}
 
 #endif
