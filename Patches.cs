@@ -1,7 +1,6 @@
 // OculusReportMenu/Patches.cs - Harmony Patches go here
 // (C) Copyright 2024 - 2026 SirKingBinx - MIT License
 
-using GorillaLocomotion;
 using HarmonyLib;
 
 namespace OculusReportMenu;
@@ -29,7 +28,11 @@ internal class Patches {
          * - It also shaves a tiny bit of clock cycles (but it isn't 1995 so that doesn't really
          *     matter)
          */
-        static bool Prefix(GorillaMetaReport __instance) => true; // return true to cancel the fn call
+        static bool Prefix(GorillaMetaReport __instance)
+        {
+            return false;
+            // return false to cancel the fn call
+        }
     }
 
     [HarmonyPatch(typeof(GorillaMetaReport), nameof(GorillaMetaReport.Start))]
@@ -39,6 +42,6 @@ internal class Patches {
          * This matters much less than our other Harmony patch. This method will just update
          * the main code, telling it where the GorillaMetaReport is located.
          */
-        static void Postfix(GorillaMetaReport __instance) => Main._menu = __instance;
+        static void Postfix(GorillaMetaReport __instance) => Main.Menu = __instance;
     }
 }

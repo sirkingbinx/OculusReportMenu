@@ -1,7 +1,6 @@
 // OculusReportMenu/Plugin.cs - Plugins for both mod loaders we support
 // (C) Copyright 2024 - 2026 SirKingBinx - MIT License
 
-using OculusReportMenu;
 using UnityEngine;
 
 /*
@@ -10,8 +9,10 @@ using UnityEngine;
  * as some correctly set code is here.
  */
 
+
 #if MELONLOADER
 // Stuff for MelonLoader
+using OculusReportMenu;
 using MelonLoader;
 [assembly: MelonInfo(typeof(MelonLoaderPlugin), OculusReportMenu.Constants.Name, OculusReportMenu.Constants.Version, OculusReportMenu.Constants.Author)]
 [assembly: MelonGame("Another Axiom", "Gorilla Tag")]
@@ -34,6 +35,9 @@ public class Plugin : MelonMod
     }
 }
 #elif BEPINEX
+
+/*
+
 [BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
 public class Plugin : BaseUnityPlugin
 {
@@ -46,4 +50,7 @@ public class Plugin : BaseUnityPlugin
         new GameObject(Constants.Name).AddComponent<Main>();
     }
 }
+
+*/
+
 #endif

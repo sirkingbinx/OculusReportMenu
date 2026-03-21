@@ -4,6 +4,8 @@
 using GorillaLocomotion;
 using GorillaNetworking;
 using System;
+using BepInEx;
+using BepInEx.Logging;
 
 #if MELONLOADER
 /*
@@ -23,11 +25,14 @@ namespace OculusReportMenu;
  * This handles opening/closing the report menu, updating controller input,
  * loading config, and much more.
  */
-internal class Main : MonoBehaviour
-{
-    public static Main? Instance;
 
-    public static GorillaMetaReport _menu;
+[BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
+internal class Main : BaseUnityPlugin
+{
+#nullable enable
+    public static Main? Instance;
+#nullable disable
+    public static GorillaMetaReport Menu;
 
     /*
      * This variable tells OculusReportMenu when to start updating itself.
@@ -37,7 +42,7 @@ internal class Main : MonoBehaviour
     public static bool _menuInit {
         get {
             if (!field)
-                field = (_menu != null);
+                field = (Menu != null);
             
             return field;
         }
@@ -54,7 +59,7 @@ internal class Main : MonoBehaviour
     /*
      * This is just a shortcut for us, not really required.
      */
-    public bool _showingMenu => _menu.gameObject.activeInHierarchy;
+    public bool _showingMenu => Menu.gameObject.activeInHierarchy;
 
     internal void Start() {
         Instance = this;
@@ -85,20 +90,16 @@ internal class Main : MonoBehaviour
          */
         HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
-        Input.UseCustomKeybinds = Plugin.Instance.Config.Bind("Keybinds",
-            "UseCustomKeybinds", true,
-            "Use your custom keybind settings (when off, press left + right secondaries)"
-        ).Value;
+        Input.EnableTabOpening = Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
 
-        Input.EnableTabOpening = Plugin.Instance.Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
-
-        Input.OpenButton1 = Plugin.Instance.Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
+        Input.OpenButton1 = Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
             "Button you use to open the report menu").Value;
-        Input.OpenButton2 = Plugin.Instance.Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
+        Input.OpenButton2 = Config.Bind("Keybinds", "OpenButton2", ORM_Button.RightSecondary,
             "Button you use to open the report menu").Value;
-        Input.Sensitivity = Plugin.Instance.Config.Bind("Keybinds", "Sensitivity", 0.5f,
+        Input.Sensitivity = Config.Bind("Keybinds", "Sensitivity", 0.5f,
             "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
 #endif
+
         GorillaTagger.OnPlayerSpawned(delegate
         {
             /*
@@ -106,11 +107,11 @@ internal class Main : MonoBehaviour
              * This makes it so other mods will load properly, even if ours doesn't.
              */
             try {
+                _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+
                 _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
                 _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
                 _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
-                
-                _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
             } catch (Exception ex) {
                 Debug.Log($"Failed to load OculusReportMenu: ${ex}");
             }
@@ -128,7 +129,7 @@ internal class Main : MonoBehaviour
         if (!_menuInit)
             return; // GorillaMetaReport isn't alive yet, keep waiting
 
-        if (_menu.blockButtonsUntilTimestamp > Time.time)
+        if (Menu.blockButtonsUntilTimestamp > Time.time)
             return; // Waiting until buttons can be pressed again to update stuff
 
         if (_showingMenu) {
@@ -136,7 +137,6 @@ internal class Main : MonoBehaviour
              * Make us in the report menu and in an overlay, which turns off movement and
              * stops our hands from colliding, so we don't hit or tag anybody while reporting.
              */
-            GTPlayer.Instance.InReportMenu = true;
             GTPlayer.Instance.inOverlay = true;
 
             /*
@@ -162,32 +162,38 @@ internal class Main : MonoBehaviour
                 _rightHand.transform.Rotate(90, 0, 0);
             }
 
-            _menu.CheckDistance();
-            _menu.CheckReportSubmit();
-        } else if (!_showingMenu && !inputActivatedBefore && Input.Activated)
+            // If the menu close button is being activated, close the menu
+            if (_showingMenu && (Menu.closeButton.selected || Menu.closeButton.testPress))
+                goto teardown;
+
+            Menu.CheckDistance();
+            Menu.CheckReportSubmit();
+
+            Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is enabled");
+        } else if (!inputActivatedBefore && Input.Activated)
         {
             /*
              * Here's where the menu gets activated.
              */
             inputActivatedBefore = true;
-            _menu.gameObject.SetActive(true);
-            _menu.enabled = true;
+            Menu.gameObject.SetActive(true);
+            Menu.ToggleLevelVisibility(false);
+            Menu.enabled = true;
 
-            _menu.StartOverlay();
+            Menu.StartOverlay();
+
+            Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is being enabled");
         }
 
         // This `if` block resets "inputActivatedBefore" so you can press the buttons again.
         if (inputActivatedBefore && !Input.Activated)
             inputActivatedBefore = false;
-        
-        
-        // If the menu close button is being activated, close the menu
-        if (_showingMenu && (_menu.closeButton.selected || _menu.closeButton.testPress))
-            goto teardown;
 
         // If you pressed your activation buttons again on the controller, close the menu
         if (!inputActivatedBefore && Input.Activated)
             goto teardown;
+
+        Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is idle");
 
         return; // Stop us from reaching the "teardown" block if we don't want to close the menu yet
 
@@ -197,12 +203,12 @@ internal class Main : MonoBehaviour
         * This will let you move again and close the menu so your game returns.
         */
     teardown:
-        _menu.Teardown();
+        Logger.Log("[OculusReportMenu :: Update]: updated this frame, the menu is being torn down");
+        Menu.Teardown();
+        Menu.ToggleLevelVisibility(true);
         GTPlayer.Instance.InReportMenu = false;
         GTPlayer.Instance.inOverlay = false;
 
         inputActivatedBefore = true;
-
-        return;
     }
 }

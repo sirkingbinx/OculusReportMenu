@@ -1,102 +1,103 @@
-// OculusReportMenu
-// (C) Copyright 2024 - 2026 SirKingBinx (Bingus)
-// MIT License
+// OculusReportMenu/Input.cs - Handles controller input
+// (C) Copyright 2024 - 2026 SirKingBinx - MIT License
 
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using Valve.VR;
 
-namespace OculusReportMenu {
-    internal class Input {
-        /*
-         * This handles binding report menu buttons
-        */
+namespace OculusReportMenu;
 
-        internal static float Sensitivity = 0.5f; 
+/*
+ * OculusReportMenu allows you to rebind what controller inputs are required to open the menu.
+ * This is where that data is stored.
+ */
 
-        internal static ORM_Button OpenButton1 = ORM_Button.LeftPrimary;
-        internal static ORM_Button OpenButton2 = ORM_Button.LeftSecondary;
+internal class Input
+{
+    internal static float Sensitivity = 0.5f;
 
-        internal static bool EnableTabOpening, UseCustomKeybinds;
+    // -- All of these are set by Main.Start; see that for how this info is gathered -- //
+    internal static ORM_Button OpenButton1 = ORM_Button.LeftPrimary;
+    internal static ORM_Button OpenButton2 = ORM_Button.LeftSecondary;
 
-        internal static bool Activated {
-            get {
-                bool normal = !UseCustomKeybinds
-                    && ControllerInputPoller.instance.leftControllerSecondaryButton
-                    && ControllerInputPoller.instance.rightControllerSecondaryButton
-                ;
-                
-                bool custom = UseCustomKeybinds
-                    && CheckButtonPressedStatus(OpenButton1)
-                    && CheckButtonPressedStatus(OpenButton2)
-                ;
-                
-                bool tab = EnableTabOpening
-                    && Keyboard.current.tabKey.wasPressedThisFrame
-                ;
-                
-                return normal || custom || tab;
-            }
-        }
+    internal static bool EnableTabOpening;
+    // -- END "all of these" -- //
 
-        private static bool CheckButtonPressedStatus(ORM_Button thisEntry)
+    // Note: this stuff is pending a rewrite to save a bunch of CPU cycles and do some optimization tricks:
+    // Resolve what method is needed to get controller input on startup, saving a whole lot of code
+    internal static bool Activated
+    {
+        get
         {
-            var resNormal = thisEntry switch
-            {
-                ORM_Button.LeftPrimary => ControllerInputPoller.PrimaryButtonPress(XRNode.LeftHand),
-                ORM_Button.LeftSecondary => ControllerInputPoller.SecondaryButtonPress(XRNode.LeftHand),
-                ORM_Button.LeftTrigger => ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity,
-                ORM_Button.LeftGrip => ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity,
+            bool custom = CheckButtonPressedStatus(OpenButton1)
+                && CheckButtonPressedStatus(OpenButton2)
+            ;
 
-            switch (thisEntry)
-            {
-                case ORM_Button.LeftPrimary: return ControllerInputPoller.instance.leftControllerPrimaryButton;
-                case ORM_Button.LeftSecondary: return ControllerInputPoller.instance.leftControllerSecondaryButton;
-                case ORM_Button.LeftTrigger: return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
-                case ORM_Button.LeftGrip: return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
-                case ORM_Button.LeftJoystickClick:
-                    if (Main.Instance._platformSteam)
-                        temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
-                    else
-                        InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
+            bool tab = EnableTabOpening
+                && Keyboard.current.tabKey.isPressed;
 
-                    return temporarySClick;
+            Debug.Log($"[OculusReportMenu] btns pressed: {custom}");
+            Debug.Log($"[OculusReportMenu] tab pressed: {tab}");
 
-                // right hand
-                case ORM_Button.RightPrimary: return ControllerInputPoller.instance.rightControllerPrimaryButton;
-                case ORM_Button.RightSecondary: return ControllerInputPoller.instance.rightControllerSecondaryButton;
-                case ORM_Button.RightTrigger: return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
-                case ORM_Button.RightGrip: return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
-                case ORM_Button.RightJoystickClick:
-                    if (Main.Instance._platformSteam)
-                        temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
-                    else
-                        InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
-
-                    return temporarySClick;
-
-                // NAN
-                case ORM_Button.None:
-                    return true;
-            }
-            
-            return false;
+            return custom || tab;
         }
     }
 
-    public enum ORM_Button {
-        None = -1,
-        
-        LeftPrimary = 0,
-        LeftSecondary,
-        LeftGrip,
-        LeftTrigger,
-        LeftJoystickClick,
+    private static bool CheckButtonPressedStatus(ORM_Button thisEntry)
+    {
+        bool temporarySClick;
 
-        RightPrimary = 10,
-        RightSecondary,
-        RightGrip,
-        RightTrigger,
-        RightJoystickClick
+        switch (thisEntry)
+        {
+            case ORM_Button.LeftPrimary: return ControllerInputPoller.instance.leftControllerPrimaryButton;
+            case ORM_Button.LeftSecondary: return ControllerInputPoller.instance.leftControllerSecondaryButton;
+            case ORM_Button.LeftTrigger: return ControllerInputPoller.instance.leftControllerIndexFloat > Sensitivity;
+            case ORM_Button.LeftGrip: return ControllerInputPoller.instance.leftControllerGripFloat > Sensitivity;
+            case ORM_Button.LeftJoystickClick:
+                if (Main.Instance._platformSteam)
+                    temporarySClick = SteamVR_Actions.gorillaTag_LeftJoystickClick.state;
+                else
+                    InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
+
+                return temporarySClick;
+
+            // right hand
+            case ORM_Button.RightPrimary: return ControllerInputPoller.instance.rightControllerPrimaryButton;
+            case ORM_Button.RightSecondary: return ControllerInputPoller.instance.rightControllerSecondaryButton;
+            case ORM_Button.RightTrigger: return ControllerInputPoller.instance.rightControllerIndexFloat > Sensitivity;
+            case ORM_Button.RightGrip: return ControllerInputPoller.instance.rightControllerGripFloat > Sensitivity;
+            case ORM_Button.RightJoystickClick:
+                if (Main.Instance._platformSteam)
+                    temporarySClick = SteamVR_Actions.gorillaTag_RightJoystickClick.state;
+                else
+                    InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out temporarySClick);
+
+                return temporarySClick;
+
+            // NAN
+            case ORM_Button.None:
+                return true;
+        }
+
+        return false;
     }
+}
+
+// Here's where our button names are stored.
+public enum ORM_Button
+{
+    None = -1,
+
+    LeftPrimary = 0,
+    LeftSecondary,
+    LeftGrip,
+    LeftTrigger,
+    LeftJoystickClick,
+
+    RightPrimary = 10,
+    RightSecondary,
+    RightGrip,
+    RightTrigger,
+    RightJoystickClick
 }
