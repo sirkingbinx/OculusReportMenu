@@ -12,8 +12,6 @@ using System;
  */
 using System.IO;
 using MelonLoader;
-#elif BEPINEX
-using BepInEx;
 #endif
 
 using UnityEngine;

@@ -53,6 +53,7 @@ public class Plugin : BaseUnityPlugin
     public void Awake()
     {
         Instance = this;
+        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
         Main.Instance = new Main();
     }
 
