@@ -9,7 +9,6 @@ using UnityEngine;
  * as some correctly set code is here.
  */
 
-
 #if MELONLOADER
 // Stuff for MelonLoader
 using OculusReportMenu;
@@ -31,9 +30,14 @@ public class Plugin : MelonMod
     * MelonLoader doesn't have a great "start" call that we can hook onto.
     * Instead, we wait for the first scene to load before adding OculusReportMenu to it.
     */
+    public override void OnInitializeMelon()
+    {
+        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
+        Main.Instance = new Main();
+    }
+
     public override void OnLateInitializeMelon() {
-        Main.Instance ??= new Main();
-        Main.Instance.Start();
+        Main.Instance?.Start();
     }
 
     public override void OnUpdate() => Main.Instance?.Update();

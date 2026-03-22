@@ -62,7 +62,6 @@ internal class Main
 
     internal void Start() {
         Instance = this;
-        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
 
 #if MELONLOADER
         /*
@@ -106,15 +105,24 @@ internal class Main
              * This makes it so other mods will load properly, even if ours doesn't.
              */
             try {
-                _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
-
-                _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
-                _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
-                _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+                UpdateObjects();
             } catch (Exception ex) {
                 Debug.Log($"Failed to load OculusReportMenu: ${ex}");
             }
         });
+    }
+
+    private bool objectsOk = false;
+
+    private void UpdateObjects()
+    {
+        _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
+
+        _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");
+        _leftHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/LeftHandParent");
+        _rightHand = GameObject.Find("Miscellaneous Scripts/MetaReporting/CollisionRB/RightHandParent");
+
+        objectsOk = (_occluder != null && _leftHand != null && _rightHand != null);
     }
 
     /*
@@ -127,6 +135,9 @@ internal class Main
     internal void Update() {
         if (!_menuInit)
             return; // GorillaMetaReport isn't alive yet, keep waiting
+
+        if (!objectsOk)
+            UpdateObjects();
 
         if (Menu.blockButtonsUntilTimestamp > Time.time)
             return; // Waiting until buttons can be pressed again to update stuff
