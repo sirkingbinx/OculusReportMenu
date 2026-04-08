@@ -37,9 +37,6 @@ internal class Input
             bool tab = EnableTabOpening
                 && Keyboard.current.tabKey.isPressed;
 
-            Debug.Log($"[OculusReportMenu] btns pressed: {custom}");
-            Debug.Log($"[OculusReportMenu] tab pressed: {tab}");
-
             return custom || tab;
         }
     }
