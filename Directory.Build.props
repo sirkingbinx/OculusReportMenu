@@ -20,4 +20,10 @@
         <MelonLoaderAssemblyPath>$(GamePath)\MelonLoader\net35</MelonLoaderAssemblyPath>
         <PluginsPath>$(GamePath)\Mods</PluginsPath>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(CI)' == 'true'">
+        <GamePath>.\Libs</GamePath>
+        <BepInExAssemblyPath>.\Libs</BepInExAssemblyPath>
+        <PluginsPath>$(GamePath)\BepInEx\plugins\OculusReportMenu</PluginsPath>
+    </PropertyGroup>
 </Project>
