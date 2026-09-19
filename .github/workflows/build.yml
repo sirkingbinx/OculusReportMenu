@@ -1,0 +1,27 @@
+name: Build Test
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+  
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+
+      - name: Setup Gorilla Tag
+        uses: sirkingbinx/setup-gorilla-tag@1.0.0
+
+      - name: Build Solution
+        run: |
+          dotnet build -c Debug
+          dotnet build -c Release
