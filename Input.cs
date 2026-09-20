@@ -1,7 +1,6 @@
 // OculusReportMenu/Input.cs - Handles controller input
 // (C) Copyright 2024 - 2026 SirKingBinx - MIT License
 
-using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using Valve.VR;

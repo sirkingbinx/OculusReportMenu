@@ -4,16 +4,6 @@
 using GorillaLocomotion;
 using GorillaNetworking;
 using System;
-
-#if MELONLOADER
-/*
- * MelonLoader also contains some extra dependencies that we need here, all of them are
- * just for allowing custom configurations.
- */
-using System.IO;
-using MelonLoader;
-#endif
-
 using UnityEngine;
 
 namespace OculusReportMenu;
@@ -26,9 +16,7 @@ namespace OculusReportMenu;
 
 internal class Main
 {
-#nullable enable
-    public static Main? Instance;
-#nullable disable
+    public static Main Instance = null!;
     public static GorillaMetaReport Menu;
 
     /*
@@ -61,31 +49,7 @@ internal class Main
     internal void Start() {
         Instance = this;
 
-#if MELONLOADER
-        /*
-         * MelonLoader config is set up here.
-         * We specify a custom path so it's easy to find it.
-         */
-        var configCategory = MelonPreferences.CreateCategory("Keybinds");
-        configCategory.SetFilePath($"UserData{Path.DirectorySeparatorChar}OculusReportMenu.cfg", true);
-
-        Input.OpenButton1 = configCategory.CreateEntry("OpenButton1", ORM_Button.LeftSecondary,
-            description: "Button you use to open the report menu").Value;
-        Input.OpenButton2 = configCategory.CreateEntry("OpenButton2", ORM_Button.RightSecondary,
-            description: "Button you use to open the report menu").Value;
-
-        Input.Sensitivity = configCategory.CreateEntry("Sensitivity", 0.5f,
-            description: "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
-
-        Input.EnableTabOpening =
-            configCategory.CreateEntry("AllowTabOpen", false, description: "Press TAB to open the report menu").Value;
-
-        configCategory.SaveToFile();
-#elif BEPINEX
-        /*
-         * Same thing as above, but for BepInEx.
-         */
-
+        // Here is where we define our configruable fields
         Input.EnableTabOpening = Plugin.Instance.Config.Bind("Keybinds", "AllowTabOpen", false, "Press TAB to open").Value;
 
         Input.OpenButton1 = Plugin.Instance.Config.Bind("Keybinds", "OpenButton1", ORM_Button.LeftSecondary,
@@ -94,7 +58,6 @@ internal class Main
             "Button you use to open the report menu").Value;
         Input.Sensitivity = Plugin.Instance.Config.Bind("Keybinds", "Sensitivity", 0.5f,
             "Sensitivity of trigger / grip detection (0.5f = 50%)").Value;
-#endif
 
         GorillaTagger.OnPlayerSpawned(delegate
         {
@@ -114,6 +77,7 @@ internal class Main
 
     private void UpdateObjects()
     {
+        // We find everything we need here
         _platformSteam = PlayFabAuthenticator.instance.platform.PlatformTag.ToLower().Contains("steam");
 
         _occluder = GameObject.Find("Miscellaneous Scripts/MetaReporting/ReportOccluder");

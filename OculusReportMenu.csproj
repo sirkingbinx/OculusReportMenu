@@ -6,27 +6,16 @@
 		<PlatformTarget Condition="'$(Loader)' == 'MELONLOADER'">x64</PlatformTarget>
 	</PropertyGroup>
 
-	<PropertyGroup>
-      <!-- See Directory.Build.props-->
-      <DefineConstants>$(DefineConstants);$(Loader)</DefineConstants>
-    </PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
 		
-		<Reference Include="0Harmony" Condition="'$(Loader)' == 'BEPINEX'">
+		<Reference Include="0Harmony">
 		  <HintPath>$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
-		</Reference>
-		<Reference Include="0Harmony" Condition="'$(Loader)' == 'MELONLOADER'">
-		  <HintPath>$(MelonLoaderAssemblyPath)\0Harmony.dll</HintPath>
 		</Reference>
 		<Reference Include="Assembly-CSharp" Publicize="true">
 		  <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
 		</Reference>
-		<Reference Include="MelonLoader" Condition="'$(Loader)' == 'MELONLOADER'">
-		  <HintPath>$(MelonLoaderAssemblyPath)\MelonLoader.dll</HintPath>
-		</Reference>
-		<Reference Include="BepInEx" Condition="'$(Loader)' == 'BEPINEX'">
+		<Reference Include="BepInEx">
 		  <HintPath>$(BepInExAssemblyPath)\BepInEx.dll</HintPath>
 		</Reference>
 		<Reference Include="Meta.XR.BuildingBlocks">

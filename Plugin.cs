@@ -1,48 +1,9 @@
-// OculusReportMenu/Plugin.cs - Plugins for both mod loaders we support
+// OculusReportMenu/Plugin.cs - Main plugin file
 // (C) Copyright 2024 - 2026 SirKingBinx - MIT License
 
-using UnityEngine;
-
-/*
- * This looks funny, but I promise it makes sense: cross-loader support goes here
- * This allows you to run OculusReportMenu on basically any mod loader you desire, as long
- * as some correctly set code is here.
- */
-
-#if MELONLOADER
-// Stuff for MelonLoader
-using OculusReportMenu;
-using MelonLoader;
-[assembly: MelonInfo(typeof(Plugin), OculusReportMenu.Constants.Name, OculusReportMenu.Constants.Version, OculusReportMenu.Constants.Author)]
-[assembly: MelonGame("Another Axiom", "Gorilla Tag")]
-[assembly: HarmonyDontPatchAll]
-#elif BEPINEX
-// Stuff for BepInEx (a lot less compared to ML)
 using BepInEx;
-#endif
 
 namespace OculusReportMenu;
-
-#if MELONLOADER
-public class Plugin : MelonMod
-{
-    /*
-    * MelonLoader doesn't have a great "start" call that we can hook onto.
-    * Instead, we wait for the first scene to load before adding OculusReportMenu to it.
-    */
-    public override void OnInitializeMelon()
-    {
-        HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
-        Main.Instance = new Main();
-    }
-
-    public override void OnLateInitializeMelon() {
-        Main.Instance?.Start();
-    }
-
-    public override void OnUpdate() => Main.Instance?.Update();
-}
-#elif BEPINEX
 
 [BepInPlugin(Constants.Guid, Constants.Name, Constants.Version)]
 public class Plugin : BaseUnityPlugin
@@ -52,7 +13,10 @@ public class Plugin : BaseUnityPlugin
 
     public void Awake()
     {
+        // This is where we define Instance so our Main class can use them
         Instance = this;
+
+        // Apply our patches (see Patches.cs)
         HarmonyLib.Harmony.CreateAndPatchAll(GetType().Assembly, Constants.Guid);
         Main.Instance = new Main();
     }
@@ -60,5 +24,3 @@ public class Plugin : BaseUnityPlugin
     public void Start() => Main.Instance.Start();
     public void Update() => Main.Instance.Update();
 }
-
-#endif
